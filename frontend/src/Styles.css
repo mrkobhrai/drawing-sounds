@@ -1,0 +1,12 @@
+.GraphPoint {
+    width: 20px;
+    height: 20px;
+    background-color: #61dafb;
+    border-radius: 50%;
+}
+
+.GraphBackground {
+    width: 200px;
+    height: 200px;
+    background-color: black;
+}
