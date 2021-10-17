@@ -18,10 +18,14 @@ class InputGraph extends React.Component<Props, State> {
     constructor(props: Props) {
         super(props);
     }
-    width: number = this.props.width ?? 1000
-    height: number = this.props.height ?? 500
-    no_horiz_subdivisions: number = this.props.no_horiz_subdivisions ?? 5
-    no_vert_subdivisions: number = this.props.no_vert_subdivisions ?? 5
+    width = this.props.width ?? 1000
+    widthLeftOffset = 200
+    widthRightOffset = 30
+    height = this.props.height ?? 500
+    heightTopOffset = 30
+    heightBottomOffset = 100
+    no_horiz_subdivisions = this.props.no_horiz_subdivisions ?? 5
+    no_vert_subdivisions = this.props.no_vert_subdivisions ?? 5
 
     state: State = {
         nextPointId: 0,
@@ -37,6 +41,9 @@ class InputGraph extends React.Component<Props, State> {
     handleNewPoint: (event: React.MouseEvent) => void = (event: React.MouseEvent) => {
         const x = event.clientX
         const y = event.clientY
+        if (x < this.widthLeftOffset || x > this.width - this.widthRightOffset || y < this.heightTopOffset || y > this.height - this.heightBottomOffset) {
+            return
+        }
         const id = this.state.nextPointId
         const point = new GraphPoint({id, x, y, handleClick: (event) => this.handleRemovePoint(event, id)})
         this.state.points.set(this.state.nextPointId, point)
@@ -57,45 +64,42 @@ class InputGraph extends React.Component<Props, State> {
     }
 
     generateVerticalDivisions = () => {
-        //const lines
+        const lines = []
+        const toDivideLength = this.width - this.widthLeftOffset - this.widthRightOffset;
+        let cnt = 0;
+        for (let x = 0; x <= toDivideLength; x = x + (toDivideLength / (this.no_vert_subdivisions))) {
+            lines.push(<line x1={this.widthLeftOffset + x} x2={this.widthLeftOffset + x} y1={this.heightTopOffset} y2={this.height - this.heightBottomOffset}/>)
+            lines.push(<text x={this.widthLeftOffset + x} y={this.height - this.heightBottomOffset + 20}>{cnt}</text>)
+            cnt++
+        }
+
+        lines.push(<text x={this.widthLeftOffset + toDivideLength / 2} y={this.height - 20} textAnchor='middle'>Bottom Label</text>)
+        return <g className={styles.grid} id="xGrid ">
+            {lines}
+        </g>
+    }
+
+    generateHorizontalDivisions = () => {
+        const lines = []
+        const toDivideLength = this.height - this.heightTopOffset - this.heightBottomOffset;
+        let cnt = this.no_horiz_subdivisions;
+        for (let y = 0; y <= toDivideLength; y = y + (toDivideLength / (this.no_horiz_subdivisions))) {
+            lines.push(<line x1={this.widthLeftOffset} x2={this.width - this.widthRightOffset} y1={y + this.heightTopOffset} y2={y + this.heightTopOffset}/>)
+            lines.push(<text x={this.widthLeftOffset - 20} y={y + this.heightTopOffset}>{cnt}</text>)
+            cnt--
+        }
+
+        lines.push(<text x={this.widthLeftOffset / 2} y={this.heightTopOffset + toDivideLength / 2} textAnchor='middle'>Left label</text>)
+        return <g className={styles.grid} id="yGrid">
+            {lines}
+        </g>
     }
 
     render() {
         return <svg className={styles.graph} width={this.width} height={this.height} onClick={this.handleNewPoint} fill='black'>
-            {/* Grid lines */}
-            <g className={styles.grid} id="xGrid ">
-                <line x1="213" x2="213" y1="10" y2="380"/>
-                <line x1="359" x2="359" y1="10" y2="380"/>
-                <line x1="505" x2="505" y1="10" y2="380"/>
-                <line x1="651" x2="651" y1="10" y2="380"/>
-                <line x1="797" x2="797" y1="10" y2="380"/>
-            </g>
-            <g className={styles.grid} id="yGrid">
-                <line x1="186" x2="797" y1="10" y2="10"/>
-                <line x1="186" x2="797" y1="68" y2="68"/>
-                <line x1="186" x2="797" y1="126" y2="126"/>
-                <line x1="186" x2="797" y1="185" y2="185"/>
-                <line x1="186" x2="797" y1="243" y2="243"/>
-                <line x1="186" x2="797" y1="301" y2="301"/>
-                <line x1="186" x2="797" y1="360" y2="360"/>
-            </g>
-
-            {/* Grid lables */}
-            <g className="labels x-labels">
-                <text x="213" y="400">1</text>
-                <text x="359" y="400">2</text>
-                <text x="505" y="400">3</text>
-                <text x="651" y="400">4</text>
-                <text x="797" y="400">5</text>
-                <text x="450" y="450"> Time?(ms)</text>
-            </g>
-            <g className="labels y-labels">
-                <text x="160" y="15">15</text>
-                <text x="160" y="131">10</text>
-                <text x="160" y="248">5</text>
-                <text x="160" y="365">0</text>
-                <text x="20" y="200">Something?(m)</text>
-            </g>
+            {/* Grid lines and labels*/}
+            {this.generateVerticalDivisions()}
+            {this.generateHorizontalDivisions()}
             {
                  Array.from(this.state.points.values()).map(point => {
                      return point.render()
