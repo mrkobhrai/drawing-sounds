@@ -1,0 +1,15 @@
+svg {
+  &.graph {
+
+    .betweenPoints {
+      stroke: red;
+      stroke-width: 3;
+    }
+
+    .grid {
+      stroke: black;
+      stroke-dasharray: 1 2;
+      stroke-width: 1;
+    }
+  }
+}
