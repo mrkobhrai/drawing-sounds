@@ -1,10 +1,15 @@
-import React from 'react';
+import React, {createRef} from 'react';
 import './App.css';
-import GraphPoint from "./GraphPoint";
 import InputGraph from "./InputGraph";
 
 function App() {
-  return <InputGraph/>
+  let ref = createRef<InputGraph>();
+  const inputGraph = <InputGraph ref={ref}/>
+
+  return <div>
+    {inputGraph}
+    <button onClick={() => ref.current?.resetPoints()}>RESET</button>
+  </div>
 }
 
 export default App;

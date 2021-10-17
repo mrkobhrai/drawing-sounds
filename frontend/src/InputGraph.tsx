@@ -15,9 +15,6 @@ interface State{
 }
 
 class InputGraph extends React.Component<Props, State> {
-    constructor(props: Props) {
-        super(props);
-    }
     width = this.props.width ?? 1000
     widthLeftOffset = 200
     widthRightOffset = 30
@@ -58,7 +55,7 @@ class InputGraph extends React.Component<Props, State> {
         for (let i = 0; i < points.length - 1; i++) {
             const leftPoint = points[i];
             const rightPoint = points[i + 1]
-            lines.push(<line className={styles.betweenPoints} x1={leftPoint.x} x2={rightPoint.x} y1={leftPoint.y} y2={rightPoint.y}/>)
+            lines.push(<line key={`line${i}`} className={styles.betweenPoints} x1={leftPoint.x} x2={rightPoint.x} y1={leftPoint.y} y2={rightPoint.y}/>)
         }
         return lines
     }
@@ -68,12 +65,12 @@ class InputGraph extends React.Component<Props, State> {
         const toDivideLength = this.width - this.widthLeftOffset - this.widthRightOffset;
         let cnt = 0;
         for (let x = 0; x <= toDivideLength; x = x + (toDivideLength / (this.no_vert_subdivisions))) {
-            lines.push(<line x1={this.widthLeftOffset + x} x2={this.widthLeftOffset + x} y1={this.heightTopOffset} y2={this.height - this.heightBottomOffset}/>)
-            lines.push(<text x={this.widthLeftOffset + x} y={this.height - this.heightBottomOffset + 20}>{cnt}</text>)
+            lines.push(<line key={`vertical-division${cnt}`} x1={this.widthLeftOffset + x} x2={this.widthLeftOffset + x} y1={this.heightTopOffset} y2={this.height - this.heightBottomOffset}/>)
+            lines.push(<text key={`vertical-division${cnt}-text`} x={this.widthLeftOffset + x} y={this.height - this.heightBottomOffset + 20}>{cnt}</text>)
             cnt++
         }
 
-        lines.push(<text x={this.widthLeftOffset + toDivideLength / 2} y={this.height - 20} textAnchor='middle'>Bottom Label</text>)
+        lines.push(<text key={`vertical-division-label`} x={this.widthLeftOffset + toDivideLength / 2} y={this.height - 20} textAnchor='middle'>Bottom Label</text>)
         return <g className={styles.grid} id="xGrid ">
             {lines}
         </g>
@@ -84,15 +81,22 @@ class InputGraph extends React.Component<Props, State> {
         const toDivideLength = this.height - this.heightTopOffset - this.heightBottomOffset;
         let cnt = this.no_horiz_subdivisions;
         for (let y = 0; y <= toDivideLength; y = y + (toDivideLength / (this.no_horiz_subdivisions))) {
-            lines.push(<line x1={this.widthLeftOffset} x2={this.width - this.widthRightOffset} y1={y + this.heightTopOffset} y2={y + this.heightTopOffset}/>)
-            lines.push(<text x={this.widthLeftOffset - 20} y={y + this.heightTopOffset}>{cnt}</text>)
+            lines.push(<line key={`horizontal-division${cnt}`} x1={this.widthLeftOffset} x2={this.width - this.widthRightOffset} y1={y + this.heightTopOffset} y2={y + this.heightTopOffset}/>)
+            lines.push(<text key={`horizontal-division${cnt}-text`} x={this.widthLeftOffset - 20} y={y + this.heightTopOffset}>{cnt}</text>)
             cnt--
         }
 
-        lines.push(<text x={this.widthLeftOffset / 2} y={this.heightTopOffset + toDivideLength / 2} textAnchor='middle'>Left label</text>)
+        lines.push(<text key={`horizontal-division-label`} x={this.widthLeftOffset / 2} y={this.heightTopOffset + toDivideLength / 2} textAnchor='middle'>Left label</text>)
         return <g className={styles.grid} id="yGrid">
             {lines}
         </g>
+    }
+
+    resetPoints = () => {
+        this.setState({
+            points: new Map(),
+            nextPointId: 0,
+        })
     }
 
     render() {

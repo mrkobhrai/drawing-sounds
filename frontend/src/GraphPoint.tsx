@@ -10,10 +10,6 @@ interface Props {
 interface State{}
 
 class GraphPoint extends React.Component<Props, State> {
-    constructor(props: Props) {
-        super(props);
-    }
-
     id: number = this.props.id
     x: number = this.props.x
     y: number = this.props.y
