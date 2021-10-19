@@ -11,21 +11,19 @@ class GaussianProcess:
         self.n_datapoints = n_datapoints
         self.kernel = kernel
         self.get_test_points()
-        
-        self.xs = []
-        self.ys = []
+
+        self.xs = np.array([])
+        self.ys = np.array([])
 
     def get_test_points(self):
-        self.xs_test = \
-            np.linspace(self.x_range[0], self.x_range[1], self.n_datapoints) 
+        self.xs_test = np.linspace(
+            self.x_range[0], self.x_range[1], self.n_datapoints).reshape(-1, 1)
 
     def update_data(self, xs, ys):
-        self.xs = xs
-        self.ys = ys
+        self.xs = np.array(xs).reshape(-1, 1)
+        self.ys = np.array(ys)
+        self.N = len(self.xs)
         self.gaussian_dist()
-
-    def N(self):
-        return len(self.xs)
 
     def update_n_datapoints(self, n_datapoints):
         self.n_datapoints = n_datapoints

@@ -20,7 +20,7 @@ def generate_handler():
    
    # Process input
    response = {}
-   response["samples"] = [points_gp.to_list()]
+   response["samples"] = [points_gp.tolist()]
    return response
 
 
