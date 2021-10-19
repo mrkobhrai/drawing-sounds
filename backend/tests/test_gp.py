@@ -1,10 +1,7 @@
 import numpy as np
 import pytest
 
-from gp.gp import GaussianProcess
-from gp.kernels import negative_exponential_kernel
-
-
+from model import GaussianProcess, negative_exponential_kernel
 
 
 @pytest.mark.parametrize("seed", [10, 20, 30])
