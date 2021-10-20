@@ -4,11 +4,11 @@ import InputGraph from "./InputGraph";
 import SoundGenerator from './SoundGenerator';
 
 function App() {
-  const ref = useRef<InputGraph>(null);
-  const soundGenerator = new SoundGenerator(ref);
+  const graphRef = useRef<InputGraph>(null);
+  const soundGenerator = new SoundGenerator(graphRef);
   
   const [parameter, setParameter] = useState(1);
-  const [inputGraph, setInputGraph] = useState(<InputGraph ref={ref}/>)
+  const [inputGraph, setInputGraph] = useState(<InputGraph ref={graphRef}/>)
 
   const updateParameter: (event: ChangeEvent<HTMLInputElement>) => void = (event) => {
     setParameter(parseFloat(event.target.value))
@@ -16,7 +16,7 @@ function App() {
 
   return <div>
     {inputGraph}
-    <button onClick={() => ref.current?.resetPoints()}>RESET</button>
+    <button onClick={() => graphRef.current?.resetPoints()}>RESET</button>
     <button onClick={soundGenerator.playFromStart}>PLAY</button>
     <button onClick={soundGenerator.generateSound}>GENERATE</button>
     <div/>
