@@ -7,6 +7,7 @@ interface Props {
     height?: number,
     no_horiz_subdivisions?: number,
     no_vert_subdivisions?: number,
+    soundGenFunc: () => void,
 }
 
 interface State{
@@ -33,6 +34,11 @@ class InputGraph extends React.Component<Props, State> {
         event.stopPropagation()
         this.state.points.delete(id)
         this.setState({})
+        this.generateSounds();
+    }
+
+    generateSounds: () => void = () => {
+        this.props.soundGenFunc();
     }
 
     handleNewPoint: (event: React.MouseEvent) => void = (event: React.MouseEvent) => {
@@ -45,6 +51,7 @@ class InputGraph extends React.Component<Props, State> {
         const point = new GraphPoint({id, x, y, handleClick: (event) => this.handleRemovePoint(event, id)})
         this.state.points.set(this.state.nextPointId, point)
         this.setState({nextPointId: this.state.nextPointId + 1})
+        this.generateSounds();
     }
 
     generateLines = () => {
@@ -97,6 +104,7 @@ class InputGraph extends React.Component<Props, State> {
             points: new Map(),
             nextPointId: 0,
         })
+        this.generateSounds();
     }
 
     render() {
