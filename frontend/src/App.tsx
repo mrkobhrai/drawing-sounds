@@ -1,10 +1,10 @@
-import React, {ChangeEvent, createRef, useState} from 'react';
+import React, {ChangeEvent, createRef, useRef, useState} from 'react';
 import './App.css';
 import InputGraph from "./InputGraph";
 
 function App() {
   const [parameter, setParameter] = useState(1)
-  let ref = createRef<InputGraph>();
+  const ref = useRef<InputGraph>(null)
   const [inputGraph, setInputGraph] = useState(<InputGraph ref={ref}/>)
 
   const updateParameter: (event: ChangeEvent<HTMLInputElement>) => void = (event) => {
