@@ -104,13 +104,11 @@ class InputGraph extends React.Component<Props, State> {
             {/* Grid lines and labels*/}
             {this.generateVerticalDivisions()}
             {this.generateHorizontalDivisions()}
+            {this.generateLines()}
             {
                  Array.from(this.state.points.values()).map(point => {
                      return point.render()
                  })
-            }
-            {
-                this.generateLines()
             }
         </svg>
     }
