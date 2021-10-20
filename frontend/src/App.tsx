@@ -11,23 +11,32 @@ function App() {
   const osc = new Tone.Oscillator().connect(pitchShifter);
 
   const genSound = () => {
-    const points = [{x:0, y:0.1}, {x:0.5, y:12}, {x:1, y:14}, {x:1.5, y:0.1}];
-    for(let i = 0; i < points.length; i++) {
-      const point = points[i];
-      Tone.Transport.schedule((time) => {
-        osc.start(time);
-        if (i < points.length - 1) {
-          const timeOffset = points[i+1].x - point.x;
-          osc.stop(time + timeOffset);
-        } else {
-          osc.stop(0.1);
-        }
-        pitchShifter.pitch = point.y;
-      }, point.x);
+    const pointsMap = ref.current?.state.points;
+    
+    if(pointsMap) {
+      const points = Array.from(pointsMap.values());
+      
+      for(let i = 0; i < points.length; i++) {
+        const point = points[i];
+        const divider = 100;
+        const x = point.x / divider;
+        const y = point.y / divider;
+        Tone.Transport.schedule((time) => {
+          osc.start(time);
+
+          if (i < points.length - 1) {
+            const timeOffset = (points[i+1].x/divider) - x;
+            osc.stop(time + timeOffset);
+          } else {
+            osc.stop(time + 0.1);
+          }
+
+          pitchShifter.pitch = y;
+        }, x);
+      }
+
     }
   }
-
-  genSound();
 
   const play = () => {
     Tone.start();
