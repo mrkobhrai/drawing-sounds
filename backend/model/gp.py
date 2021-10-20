@@ -5,7 +5,7 @@ import numpy as np
 from .kernels import negative_exponential_kernel
 
 class GaussianProcess:
-    def __init__(self, x_range: tuple[float, float], n_datapoints: int,
+    def __init__(self, x_range, n_datapoints: int,
                  kernel: Callable=negative_exponential_kernel):
         self.x_range = x_range        
         self.n_datapoints = n_datapoints
@@ -47,7 +47,7 @@ class GaussianProcess:
     def sample_from_prior(self, n_samples=1):
         L = np.linalg.cholesky(self.K_ + 1e-6 * np.eye(self.n_datapoints))
         f_prior = np.dot(
-            L, np.random.normal(size=(self.n_datapoints, n_samples)))
+            L, np.random.normal(size=(self.n_datapoints, n_samples))).reshape(-1)
 
         return f_prior
 
@@ -57,6 +57,6 @@ class GaussianProcess:
                 self.Lk.T, self.Lk))
 
         f_posterior = self.mu.reshape(-1, 1) + np.dot(
-            L, np.random.normal(size=(self.n_datapoints, n_samples)))
+            L, np.random.normal(size=(self.n_datapoints, n_samples))).reshape(-1)
 
         return f_posterior
