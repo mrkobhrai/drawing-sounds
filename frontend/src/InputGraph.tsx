@@ -13,6 +13,7 @@ interface Props {
 interface State{
     nextPointId: number,
     points: Map<number, GraphPoint>,
+    generatedPoints: Map<number, GraphPoint>,
 }
 
 class InputGraph extends React.Component<Props, State> {
@@ -28,6 +29,7 @@ class InputGraph extends React.Component<Props, State> {
     state: State = {
         nextPointId: 0,
         points: new Map(),
+        generatedPoints: new Map(),
     }
 
     handleRemovePoint: (event: React.MouseEvent, id: number) => void = (event: React.MouseEvent, id: number) => {
@@ -44,6 +46,7 @@ class InputGraph extends React.Component<Props, State> {
     handleNewPoint: (event: React.MouseEvent) => void = (event: React.MouseEvent) => {
         const x = event.clientX
         const y = event.clientY
+        console.log(x);
         if (x < this.widthLeftOffset || x > this.width - this.widthRightOffset || y < this.heightTopOffset || y > this.height - this.heightBottomOffset) {
             return
         }
@@ -103,8 +106,25 @@ class InputGraph extends React.Component<Props, State> {
         this.setState({
             points: new Map(),
             nextPointId: 0,
+            generatedPoints: new Map(),
         })
         this.generateSounds();
+    }
+
+    setGeneratedPoints = (ys: number[]) => {
+        const handleClick = () => {};
+        const resolution = this.no_horiz_subdivisions / ys.length;
+        var generatedPoints = new Map();
+        ys.forEach((rawY, index) => {
+            const id = this.state.nextPointId;
+            this.setState({nextPointId: id + 1});
+            const x = (index * resolution) * this.width + this.widthLeftOffset;
+            const y = this.height - (rawY * this.height) + this.heightBottomOffset;
+            console.log(rawY ,y);
+            generatedPoints.set(id, new GraphPoint({id, x, y, handleClick}));
+        })
+        console.log(generatedPoints);
+        this.setState({ generatedPoints });
     }
 
     render() {
@@ -115,6 +135,11 @@ class InputGraph extends React.Component<Props, State> {
             {this.generateLines()}
             {
                  Array.from(this.state.points.values()).map(point => {
+                     return point.render()
+                 })
+            }
+            {
+                 Array.from(this.state.generatedPoints.values()).map(point => {
                      return point.render()
                  })
             }
