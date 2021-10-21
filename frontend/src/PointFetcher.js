@@ -13,12 +13,9 @@ class PointFetcher {
         if(graph) 
         {
             const pointsMap = graph.state.points;
-            const width = graph.width - graph.widthLeftOffset;
-            const height = graph.height - graph.heightBottomOffset;
-            const xRange = graph.no_horiz_subdivisions;
-            const yRange = graph.no_vert_subdivisions;
-            console.log(width,height, xRange, yRange);
-            return Array.from(pointsMap.values()).map(point => [(point.x - graph.widthLeftOffset)/ width * xRange, (height - point.y) / height * yRange]);
+            const getY = graph.getYFromYCoord;
+            const getX = graph.getXFromXCoord;
+            return Array.from(pointsMap.values()).map(point => [getX(point.x), getY(point.y)]);
         }
         throw new Error("No graph found on the current screen");
     }
@@ -29,7 +26,6 @@ class PointFetcher {
         const data = await axios.post('http://localhost:5000/', postBody)
             .then(result => result.data.samples)
             .catch((error) => { 
-                console.log(error);
                 return [[]];
             });
         
