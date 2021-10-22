@@ -28,7 +28,6 @@ class PointFetcher {
             .catch((error) => { 
                 return [[]];
             });
-        
         this.graphRef.current?.setGeneratedPoints(data[0])
     }
 }

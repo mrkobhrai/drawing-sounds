@@ -34,9 +34,9 @@ class InputGraph extends React.Component<Props, State> {
     }
 
     handleRemovePoint: (event: React.MouseEvent, id: number) => void = (event: React.MouseEvent, id: number) => {
-        event.stopPropagation()
-        this.state.points.delete(id)
-        this.setState({})
+        event.stopPropagation();
+        this.state.points.delete(id);
+        this.props.fetchDataFunc();
         this.generateSounds();
     }
 
@@ -54,8 +54,8 @@ class InputGraph extends React.Component<Props, State> {
         const point = new GraphPoint({id, x, y, handleClick: (event) => this.handleRemovePoint(event, id)})
         this.state.points.set(this.state.nextPointId, point)
         this.setState({nextPointId: this.state.nextPointId + 1})
-        this.generateSounds();
         this.props.fetchDataFunc();
+        this.generateSounds();
     }
 
     generateLines = () => {

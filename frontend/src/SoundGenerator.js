@@ -22,7 +22,7 @@ class SoundGenerator {
     }
 
     fetchPoints = () => {
-        const pointsMap = this.graphRef.current?.state.points;
+        const pointsMap = this.graphRef.current?.state.generatedPoints;
         if(pointsMap) {
             return Array.from(pointsMap.values());
         }
