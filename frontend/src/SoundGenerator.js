@@ -30,30 +30,33 @@ class SoundGenerator {
     }
 
     generateSound = () => {
-        this.resetSound();
-  
-        const oscillator = this.oscillator;
-        const pitchShifter = this.pitchShifter;
-        const points = this.fetchPoints();
-        
-        for(let i = 0; i < points.length; i++) {
-            const point = points[i];
-            const divider = 100;
-            const x = point.x / divider;
-            const y = point.y / divider;
+        const graphRef = this.graphRef.current;
+        if(graphRef) {
+            const oscillator = this.oscillator;
+            const getX = graphRef.getXFromXCoord;
+            const getY = graphRef.getYFromYCoord;
+            const points = this.fetchPoints();
+            
+            for(let i = 0; i < points.length; i++) {
+                const point = points[i];
+                const x = getX(point.x);
+                const y = getY(point.y);
+                Tone.Transport.schedule((time) => {
+                    oscillator.start(time);
+                    if (i < points.length - 1) {
+                        const nextX = getX(points[i+1].x);
+                        const timeOffset = nextX - x;
+                        oscillator.stop(time + timeOffset);
+                    } else {
+                        oscillator.stop(time + 0.3);
+                    }
 
-            Tone.Transport.schedule((time) => {
-                oscillator.start(time);
-
-                if (i < points.length - 1) {
-                    const timeOffset = (points[i+1].x/divider) - x;
-                    oscillator.stop(time + timeOffset);
-                } else {
-                    oscillator.stop(time + 0.3);
-                }
-
-            pitchShifter.pitch = y;
-            }, x);
+                oscillator.volume.value = y;
+                }, x);
+            }
+        } 
+        else {
+            throw new Error("No graph found on the current screen");
         }
     }
 }
