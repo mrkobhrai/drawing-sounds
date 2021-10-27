@@ -1,23 +1,27 @@
 import * as Tone from 'tone';
+import {Oscillator, PitchShift} from "tone";
 
 class SoundGenerator {
+    oscillator: Oscillator;
+    pitchShifter: PitchShift;
+
     constructor() {
         const pitchShifter = new Tone.PitchShift().toDestination();
         this.oscillator = new Tone.Oscillator().connect(pitchShifter);
         this.pitchShifter = pitchShifter;
     }
 
-    playFromStart = () => {
+    playFromStart: () => void = () => {
         Tone.start();
         Tone.Transport.seconds = 0;
         Tone.Transport.start(Tone.now());
     }
 
-    resetSound = () => {
+    resetSound: () => void = () => {
         Tone.Transport.cancel(0);
     }
 
-    generateSound = (points) => {
+    generateSound: (points: {x: number, y: number}[]) => void = (points) => {
         this.resetSound();
   
         const oscillator = this.oscillator;

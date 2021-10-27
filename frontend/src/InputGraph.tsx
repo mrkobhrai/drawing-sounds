@@ -1,21 +1,25 @@
 import styles from './SASSStyles.module.scss'
 import GraphPoint from "./GraphPoint";
 import React from "react";
-import {SoundPoints} from "./Interfaces";
+
+interface GeneratedPoint {
+    x: number,
+    y: number,
+}
 
 interface Props {
     width?: number,
     height?: number,
     no_horiz_subdivisions?: number,
     no_vert_subdivisions?: number,
-    soundGenFunc: (points: GraphPoint[]) => void,
-    fetchDataFunc: (points: SoundPoints) => Promise<SoundPoints>,
+    soundGenFunc: (points: GeneratedPoint[]) => void,
+    fetchDataFunc: (points: number[][]) => Promise<number[][]>,
 }
 
 interface State{
     nextPointId: number,
     points: Map<number, GraphPoint>,
-    generatedPoints: Map<number, GraphPoint>,
+    generatedPoints: Map<number, GeneratedPoint>,
 }
 
 class InputGraph extends React.Component<Props, State> {
@@ -34,7 +38,7 @@ class InputGraph extends React.Component<Props, State> {
         generatedPoints: new Map(),
     }
 
-    normalizePoints: (points: GraphPoint[]) => SoundPoints = (points) => {
+    normalizePoints: (points: GraphPoint[]) => number[][] = (points) => {
         return Array.from(points.values()).map(point => [this.getXCoordFromX(point.x), this.getYCoordFromY(point.y)])
     }
 
@@ -158,7 +162,7 @@ class InputGraph extends React.Component<Props, State> {
             const x = index * resolution + this.widthLeftOffset;
             const y = this.getYCoordFromY(rawY)
             if (y >= this.heightTopOffset && y <= this.height - this.heightBottomOffset) {
-                generatedPoints.set(id, new GraphPoint({id, x, y, handleClick}));
+                generatedPoints.set(id, {x, y});
             }
         })
         this.state.generatedPoints = generatedPoints

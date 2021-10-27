@@ -1,17 +1,11 @@
 import axios from 'axios';
 
-/**
- * @param {React.RefObject<InputGraph>} graphRef Reference to input graph
- */
 class PointFetcher {
-    constructor(graphRef) {
-        this.graphRef = graphRef;
-    }
 
-    fetchData = async (points) => {
+    fetchData: (points: number[][]) => Promise<number[][]> = async (points: number[][]) => {
         const postBody = { points };
         const data = await axios.post('http://localhost:5000/', postBody)
-            .then(result => result.data.samples)
+            .then(result => (result.data as any).samples)
             .catch((error) => { 
                 return [[]];
             });
