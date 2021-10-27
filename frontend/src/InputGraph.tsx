@@ -1,14 +1,15 @@
 import styles from './SASSStyles.module.scss'
 import GraphPoint from "./GraphPoint";
 import React from "react";
+import {SoundPoints} from "./Interfaces";
 
 interface Props {
     width?: number,
     height?: number,
     no_horiz_subdivisions?: number,
     no_vert_subdivisions?: number,
-    soundGenFunc: () => void,
-    fetchDataFunc: () => Promise<void>,
+    soundGenFunc: (points: GraphPoint[]) => void,
+    fetchDataFunc: (points: SoundPoints) => Promise<SoundPoints>,
 }
 
 interface State{
@@ -33,18 +34,24 @@ class InputGraph extends React.Component<Props, State> {
         generatedPoints: new Map(),
     }
 
-    handleRemovePoint: (event: React.MouseEvent, id: number) => void = (event: React.MouseEvent, id: number) => {
+    normalizePoints: (points: GraphPoint[]) => SoundPoints = (points) => {
+        return Array.from(points.values()).map(point => [this.getXCoordFromX(point.x), this.getYCoordFromY(point.y)])
+    }
+
+    handleRemovePoint: (event: React.MouseEvent, id: number) => void = async (event: React.MouseEvent, id: number) => {
         event.stopPropagation()
         this.state.points.delete(id)
-        this.setState({})
+        const data = await this.props.fetchDataFunc(this.normalizePoints(Array.from(this.state.points.values())));
+        this.setGeneratedPoints(data[0])
         this.generateSounds();
+        this.setState({})
     }
 
     generateSounds: () => void = () => {
-        this.props.soundGenFunc();
+        this.props.soundGenFunc(Array.from(this.state.generatedPoints.values()));
     }
 
-    handleNewPoint: (event: React.MouseEvent) => void = (event: React.MouseEvent) => {
+    handleNewPoint: (event: React.MouseEvent) => void = async (event: React.MouseEvent) => {
         const x = event.clientX
         const y = event.clientY
         if (x < this.widthLeftOffset || x > this.width - this.widthRightOffset || y < this.heightTopOffset || y > this.height - this.heightBottomOffset) {
@@ -53,9 +60,10 @@ class InputGraph extends React.Component<Props, State> {
         const id = this.state.nextPointId
         const point = new GraphPoint({id, x, y, handleClick: (event) => this.handleRemovePoint(event, id)})
         this.state.points.set(this.state.nextPointId, point)
-        this.setState({nextPointId: this.state.nextPointId + 1})
+        const data = await this.props.fetchDataFunc(this.normalizePoints(Array.from(this.state.points.values())));
+        this.setGeneratedPoints(data[0])
         this.generateSounds();
-        this.props.fetchDataFunc();
+        this.setState({nextPointId: this.state.nextPointId + 1})
     }
 
     generateLines = () => {
@@ -132,29 +140,29 @@ class InputGraph extends React.Component<Props, State> {
     }
 
     resetPoints = () => {
-        this.setState({
-            points: new Map(),
-            nextPointId: 0,
-            generatedPoints: new Map(),
-        })
+        this.state.points = new Map()
+        this.state.nextPointId = 0
+        this.state.generatedPoints = new Map()
         this.generateSounds();
+        this.setState({})
     }
 
     setGeneratedPoints = (ys: number[]) => {
         const handleClick = () => {};
-        var generatedPoints = new Map();
+        const generatedPoints = new Map();
         const graphWidth = this.width - this.widthLeftOffset - this.widthRightOffset;
         const resolution = graphWidth / ys.length;
         ys.forEach((rawY, index) => {
             const id = this.state.nextPointId;
-            this.setState({nextPointId: id + 1});
+            this.state.nextPointId = id + 1;
             const x = index * resolution + this.widthLeftOffset;
             const y = this.getYCoordFromY(rawY)
             if (y >= this.heightTopOffset && y <= this.height - this.heightBottomOffset) {
                 generatedPoints.set(id, new GraphPoint({id, x, y, handleClick}));
             }
         })
-        this.setState({ generatedPoints });
+        this.state.generatedPoints = generatedPoints
+        this.setState({});
     }
 
     render() {
@@ -165,11 +173,6 @@ class InputGraph extends React.Component<Props, State> {
             {this.generateLines()}
             {
                  Array.from(this.state.points.values()).map(point => {
-                     return point.render()
-                 })
-            }
-            {
-                 Array.from(this.state.generatedPoints.values()).map(point => {
                      return point.render()
                  })
             }
