@@ -52,7 +52,12 @@ class InputGraph extends React.Component<Props, State> {
     }
 
     generateSounds: () => void = () => {
-        this.props.soundGenFunc(Array.from(this.state.generatedPoints.values()));
+        this.props.soundGenFunc(Array.from(this.state.generatedPoints.values()).map(p => {
+            return {
+                x: this.getXFromXCoord(p.x),
+                y: this.getYFromYCoord(p.y),
+            }
+        }));
     }
 
     handleNewPoint: (event: React.MouseEvent) => void = async (event: React.MouseEvent) => {
