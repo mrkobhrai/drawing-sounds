@@ -3,6 +3,7 @@ import './App.css';
 import InputGraph from "./InputGraph";
 import SoundGenerator from './SoundGenerator';
 import PointFetcher from './PointFetcher';
+import SoundGraph from './SoundGraph';
 
 function App() {
   const graphRef = useRef<InputGraph>(null);

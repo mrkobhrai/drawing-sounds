@@ -1,6 +1,7 @@
 import styles from './SASSStyles.module.scss'
 import GraphPoint from "./GraphPoint";
 import React from "react";
+import SoundGraph from './SoundGraph';
 
 interface GeneratedPoint {
     x: number,
@@ -51,13 +52,15 @@ class InputGraph extends React.Component<Props, State> {
         this.setState({})
     }
 
+    getNormalizedGeneratedPoints: () => { x: number; y: number; }[] = () => Array.from(this.state.generatedPoints.values()).map(p => {
+        return {
+            x: this.getXFromXCoord(p.x),
+            y: this.getYFromYCoord(p.y),
+        }
+    });
+
     generateSounds: () => void = () => {
-        this.props.soundGenFunc(Array.from(this.state.generatedPoints.values()).map(p => {
-            return {
-                x: this.getXFromXCoord(p.x),
-                y: this.getYFromYCoord(p.y),
-            }
-        }));
+        this.props.soundGenFunc(this.getNormalizedGeneratedPoints());
     }
 
     handleNewPoint: (event: React.MouseEvent) => void = async (event: React.MouseEvent) => {
@@ -175,17 +178,22 @@ class InputGraph extends React.Component<Props, State> {
     }
 
     render() {
-        return <svg className={styles.graph} width={this.width} height={this.height} onClick={this.handleNewPoint} fill='black'>
-            {/* Grid lines and labels*/}
-            {this.generateVerticalDivisions()}
-            {this.generateHorizontalDivisions()}
-            {this.generateLines()}
-            {
-                 Array.from(this.state.points.values()).map(point => {
-                     return point.render()
-                 })
-            }
-        </svg>
+        return (
+            <div>
+                <svg className={styles.graph} width={this.width} height={this.height} onClick={this.handleNewPoint} fill='black'>
+                    {/* Grid lines and labels*/}
+                    {this.generateVerticalDivisions()}
+                    {this.generateHorizontalDivisions()}
+                    {this.generateLines()}
+                    {
+                        Array.from(this.state.points.values()).map(point => {
+                            return point.render()
+                        })
+                    }
+                </svg>
+                <SoundGraph width={this.width} height={this.height} getDataFunc={this.getNormalizedGeneratedPoints} />
+            </div>
+        );
     }
 }
 
