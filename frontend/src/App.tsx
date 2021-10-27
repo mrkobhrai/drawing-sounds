@@ -9,7 +9,15 @@ function App() {
   const [soundGenerator, setSoundGenerator] = useState<SoundGenerator>(new SoundGenerator());
   const [pointFetcher, setPointFetcher] = useState<PointFetcher>(new PointFetcher());
   const [parameter, setParameter] = useState(1);
-  const [inputGraph] = useState(<InputGraph ref={graphRef} soundGenFunc={soundGenerator.generateSound} fetchDataFunc={pointFetcher.fetchData} />)
+  const [inputGraph] = useState(<InputGraph
+      ref={graphRef}
+      bottomLabel='Time(s)'
+      bottomMinValue={0}
+      bottomMaxValue={5}
+      leftLabel='Frequency(Hz)'
+      leftMinValue={1000}
+      leftMaxValue={6000}
+      soundGenFunc={soundGenerator.generateSound} fetchDataFunc={pointFetcher.fetchData} />)
 
   const updateParameter: (event: ChangeEvent<HTMLInputElement>) => void = (event) => {
     setParameter(parseFloat(event.target.value))

@@ -26,6 +26,28 @@ class SoundGenerator {
 
     generateSound = (points: {x: number, y: number}[]) => {
         const oscillator = this.oscillator;
+        points = [
+            {
+                x: 1,
+                y: 1000
+            },
+            {
+                x: 2,
+                y: 500
+            },
+            {
+                x: 3,
+                y: 1000
+            },
+            {
+                x: 4,
+                y: 500
+            }
+        ]
+
+        points = points.sort((p1, p2) => {
+            return p1.x - p2.x
+        })
 
         for(let i = 0; i < points.length; i++) {
             const point = points[i];
@@ -40,8 +62,7 @@ class SoundGenerator {
                 } else {
                     oscillator.stop(time + 0.3);
                 }
-
-            oscillator.volume.value = y;
+            oscillator.frequency.value = y
             }, x);
         }
     }

@@ -8,10 +8,16 @@ interface GeneratedPoint {
 }
 
 interface Props {
-    width?: number,
-    height?: number,
+    graphWidth?: number,
+    graphHeight?: number,
     no_horiz_subdivisions?: number,
     no_vert_subdivisions?: number,
+    bottomLabel: string,
+    bottomMinValue: number,
+    bottomMaxValue: number
+    leftLabel: string,
+    leftMinValue: number,
+    leftMaxValue: number,
     soundGenFunc: (points: GeneratedPoint[]) => void,
     fetchDataFunc: (points: number[][]) => Promise<number[][]>,
 }
@@ -19,45 +25,42 @@ interface Props {
 interface State{
     nextPointId: number,
     points: Map<number, GraphPoint>,
-    generatedPoints: Map<number, GeneratedPoint>,
+    generatedPoints: GeneratedPoint[],
 }
 
 class InputGraph extends React.Component<Props, State> {
-    width = this.props.width ?? 1000
     widthLeftOffset = 200
     widthRightOffset = 30
-    height = this.props.height ?? 500
+    graphWidth = this.props.graphWidth ?? 500
+    width = this.graphWidth + this.widthLeftOffset + this.widthRightOffset
     heightTopOffset = 30
     heightBottomOffset = 100
+    graphHeight = this.props.graphHeight ?? 500
+    height = this.graphHeight + this.heightTopOffset + this.heightBottomOffset
     no_horiz_subdivisions = this.props.no_horiz_subdivisions ?? 5
     no_vert_subdivisions = this.props.no_vert_subdivisions ?? 5
 
     state: State = {
         nextPointId: 0,
         points: new Map(),
-        generatedPoints: new Map(),
+        generatedPoints: [],
     }
 
     normalizePoints: (points: GraphPoint[]) => number[][] = (points) => {
-        return Array.from(points.values()).map(point => [this.getXCoordFromX(point.x), this.getYCoordFromY(point.y)])
+        return Array.from(points.values()).map(point => [this.normalizeXCoord(point.x), this.normalizeYCoord(point.y)])
     }
 
     handleRemovePoint: (event: React.MouseEvent, id: number) => void = async (event: React.MouseEvent, id: number) => {
         event.stopPropagation()
         this.state.points.delete(id)
-        const data = await this.props.fetchDataFunc(this.normalizePoints(Array.from(this.state.points.values())));
-        this.setGeneratedPoints(data[0])
         this.generateSounds();
         this.setState({})
     }
 
-    generateSounds: () => void = () => {
-        this.props.soundGenFunc(Array.from(this.state.generatedPoints.values()).map(p => {
-            return {
-                x: this.getXFromXCoord(p.x),
-                y: this.getYFromYCoord(p.y),
-            }
-        }));
+    generateSounds: () => void = async () => {
+        const data = await this.props.fetchDataFunc(this.normalizePoints(Array.from(this.state.points.values())));
+        this.setGeneratedPoints(data[0])
+        this.props.soundGenFunc(Array.from(this.state.points.values()));
     }
 
     handleNewPoint: (event: React.MouseEvent) => void = async (event: React.MouseEvent) => {
@@ -69,10 +72,16 @@ class InputGraph extends React.Component<Props, State> {
         const id = this.state.nextPointId
         const point = new GraphPoint({id, x, y, handleClick: (event) => this.handleRemovePoint(event, id)})
         this.state.points.set(this.state.nextPointId, point)
-        const data = await this.props.fetchDataFunc(this.normalizePoints(Array.from(this.state.points.values())));
-        this.setGeneratedPoints(data[0])
         this.generateSounds();
         this.setState({nextPointId: this.state.nextPointId + 1})
+    }
+
+    normalizeYCoord = (y: number) => {
+        return this.graphHeight - (y - this.heightTopOffset);
+    }
+
+    normalizeXCoord = (x: number) => {
+        return (x - this.widthLeftOffset);
     }
 
     generateLines = () => {
@@ -88,45 +97,18 @@ class InputGraph extends React.Component<Props, State> {
         return lines
     }
 
-    getXFromXCoord = (xCoord: number) => {
-        const graphWidth = this.width - this.widthLeftOffset - this.widthRightOffset;
-        const xProportion = (xCoord - this.widthLeftOffset) / graphWidth;
-        const x = xProportion * this.no_horiz_subdivisions;
-        return x;
-    }
-
-    getYFromYCoord = (yCoord: number) => {
-        const graphHeight = this.height - this.heightBottomOffset - this.heightTopOffset;
-        const yProportion = 1 - (yCoord - this.heightTopOffset) / graphHeight;
-        const y = yProportion * this.no_vert_subdivisions;
-        return y;
-    }
-
-    getYCoordFromY = (y: number) => {
-        const graphHeight = this.height - this.heightBottomOffset - this.heightTopOffset;
-        const yProportion = y / this.no_vert_subdivisions;
-        const yCoord = (1 - yProportion) * graphHeight + this.heightTopOffset;
-        return yCoord;
-    }
-
-    getXCoordFromX = (x: number) => {
-        const graphWidth = this.width - this.widthLeftOffset - this.widthRightOffset;
-        const xProportion = x / this.no_horiz_subdivisions;
-        const xCoord = xProportion * graphWidth + this.widthLeftOffset;
-        return xCoord;
-    }
-
     generateVerticalDivisions = () => {
         const lines = []
-        const toDivideLength = this.width - this.widthLeftOffset - this.widthRightOffset;
         let cnt = 0;
-        for (let x = 0; x <= toDivideLength; x = x + (toDivideLength / (this.no_vert_subdivisions))) {
+        for (let x = 0; x <= this.graphWidth; x = x + (this.graphWidth / (this.no_vert_subdivisions))) {
             lines.push(<line key={`vertical-division${cnt}`} x1={this.widthLeftOffset + x} x2={this.widthLeftOffset + x} y1={this.heightTopOffset} y2={this.height - this.heightBottomOffset}/>)
-            lines.push(<text key={`vertical-division${cnt}-text`} x={this.widthLeftOffset + x} y={this.height - this.heightBottomOffset + 20}>{cnt}</text>)
+            lines.push(<text key={`vertical-division${cnt}-text`} x={this.widthLeftOffset + x} y={this.height - this.heightBottomOffset + 20}>
+                {this.props.bottomMinValue + (cnt / this.no_vert_subdivisions) * (this.props.bottomMaxValue - this.props.bottomMinValue)}
+            </text>)
             cnt++
         }
 
-        lines.push(<text key={`vertical-division-label`} x={this.widthLeftOffset + toDivideLength / 2} y={this.height - 20} textAnchor='middle'>Bottom Label</text>)
+        lines.push(<text key={`vertical-division-label`} x={this.widthLeftOffset + this.graphWidth / 2} y={this.height - 20} textAnchor='middle'>{this.props.bottomLabel}</text>)
         return <g className={styles.grid} id="xGrid ">
             {lines}
         </g>
@@ -134,43 +116,38 @@ class InputGraph extends React.Component<Props, State> {
 
     generateHorizontalDivisions = () => {
         const lines = []
-        const toDivideLength = this.height - this.heightTopOffset - this.heightBottomOffset;
         let cnt = this.no_horiz_subdivisions;
-        for (let y = 0; y <= toDivideLength; y = y + (toDivideLength / (this.no_horiz_subdivisions))) {
+        for (let y = 0; y <= this.graphHeight; y = y + (this.graphHeight / (this.no_horiz_subdivisions))) {
             lines.push(<line key={`horizontal-division${cnt}`} x1={this.widthLeftOffset} x2={this.width - this.widthRightOffset} y1={y + this.heightTopOffset} y2={y + this.heightTopOffset}/>)
-            lines.push(<text key={`horizontal-division${cnt}-text`} x={this.widthLeftOffset - 20} y={y + this.heightTopOffset}>{cnt}</text>)
+            lines.push(<text key={`horizontal-division${cnt}-text`} x={this.widthLeftOffset - 50} y={y + this.heightTopOffset}>
+                {this.props.leftMinValue + (cnt / this.no_horiz_subdivisions) * (this.props.leftMaxValue - this.props.leftMinValue)}
+            </text>)
             cnt--
         }
 
-        lines.push(<text key={`horizontal-division-label`} x={this.widthLeftOffset / 2} y={this.heightTopOffset + toDivideLength / 2} textAnchor='middle'>Left label</text>)
+        lines.push(<text key={`horizontal-division-label`} x={this.widthLeftOffset / 2} y={this.heightTopOffset + this.graphHeight / 2} textAnchor='middle'>{this.props.leftLabel}</text>)
         return <g className={styles.grid} id="yGrid">
             {lines}
         </g>
     }
 
     resetPoints = () => {
-        this.state.points = new Map()
-        this.state.nextPointId = 0
-        this.state.generatedPoints = new Map()
+        this.state.points.clear()
+        this.state.generatedPoints.splice(0, this.setGeneratedPoints.length)
         this.generateSounds();
-        this.setState({})
+        this.setState({nextPointId: 0})
     }
 
     setGeneratedPoints = (ys: number[]) => {
-        const handleClick = () => {};
-        const generatedPoints = new Map();
-        const graphWidth = this.width - this.widthLeftOffset - this.widthRightOffset;
-        const resolution = graphWidth / ys.length;
-        ys.forEach((rawY, index) => {
-            const id = this.state.nextPointId;
-            this.state.nextPointId = id + 1;
-            const x = index * resolution + this.widthLeftOffset;
-            const y = this.getYCoordFromY(rawY)
+        this.state.generatedPoints.splice(0, this.setGeneratedPoints.length)
+        const resolution = this.graphWidth / ys.length;
+
+        ys.forEach((y, index) => {
+            const x = index * resolution;
             if (y >= this.heightTopOffset && y <= this.height - this.heightBottomOffset) {
-                generatedPoints.set(id, {x, y});
+                this.state.generatedPoints.push({x, y});
             }
         })
-        this.state.generatedPoints = generatedPoints
         this.setState({});
     }
 
