@@ -6,9 +6,8 @@ import PointFetcher from './PointFetcher';
 
 function App() {
   const graphRef = useRef<InputGraph>(null);
-  const soundGenerator = new SoundGenerator();
-  const pointFetcher = new PointFetcher();
-  
+  const [soundGenerator, setSoundGenerator] = useState<SoundGenerator>(new SoundGenerator());
+  const [pointFetcher, setPointFetcher] = useState<PointFetcher>(new PointFetcher());
   const [parameter, setParameter] = useState(1);
   const [inputGraph] = useState(<InputGraph ref={graphRef} soundGenFunc={soundGenerator.generateSound} fetchDataFunc={pointFetcher.fetchData} />)
 
