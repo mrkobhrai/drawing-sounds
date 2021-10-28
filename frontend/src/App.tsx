@@ -1,16 +1,15 @@
 import React, {ChangeEvent, useRef, useState} from 'react';
 import './App.css';
-import InputGraph from "./InputGraph";
 import SoundGenerator from './SoundGenerator';
 import PointFetcher from './PointFetcher';
 import SoundGraph from './SoundGraph';
 
 function App() {
-  const graphRef = useRef<InputGraph>(null);
+  const graphRef = useRef<SoundGraph>(null);
   const [soundGenerator, setSoundGenerator] = useState<SoundGenerator>(new SoundGenerator());
   const [pointFetcher, setPointFetcher] = useState<PointFetcher>(new PointFetcher());
   const [parameter, setParameter] = useState(1);
-  const [inputGraph] = useState(<InputGraph ref={graphRef} soundGenFunc={soundGenerator.generateSound} fetchDataFunc={pointFetcher.fetchData} />)
+  const [inputGraph] = useState(<SoundGraph ref={graphRef}  soundGenFunc={soundGenerator.generateSound} getDataFunc={pointFetcher.fetchData} />)
 
   const updateParameter: (event: ChangeEvent<HTMLInputElement>) => void = (event) => {
     setParameter(parseFloat(event.target.value))
@@ -18,7 +17,7 @@ function App() {
 
   return <div>
     {inputGraph}
-    <button onClick={() => graphRef.current?.resetPoints()}>RESET</button>
+    {/* <button onClick={() => graphRef.current?.resetPoints()}>RESET</button> */}
     <button onClick={soundGenerator.playFromStart}>PLAY</button>
     <div/>
     <label> Parameter
