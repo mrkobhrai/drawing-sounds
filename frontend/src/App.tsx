@@ -6,8 +6,8 @@ import SoundGraph from './SoundGraph';
 
 function App() {
   const graphRef = useRef<SoundGraph>(null);
-  const [soundGenerator, setSoundGenerator] = useState<SoundGenerator>(new SoundGenerator());
-  const [pointFetcher, setPointFetcher] = useState<PointFetcher>(new PointFetcher());
+  const [soundGenerator] = useState<SoundGenerator>(new SoundGenerator());
+  const [pointFetcher] = useState<PointFetcher>(new PointFetcher());
   const [parameter, setParameter] = useState(1);
   const [inputGraph] = useState(<SoundGraph ref={graphRef}  soundGenFunc={soundGenerator.generateSound} getDataFunc={pointFetcher.fetchData} />)
 

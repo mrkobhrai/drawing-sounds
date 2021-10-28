@@ -34,7 +34,6 @@ class SoundGraph extends React.Component<Props, State> {
             const yCoord = e.chartY;
             const x = this.calcXFromXCoord(xCoord);
             const y = this.calcYFromYCoord(yCoord);
-            console.log(xCoord, yCoord);
             this.setState({ userPoints: [...this.state.userPoints, {x, y}]})
             this.onPlot();
         }
