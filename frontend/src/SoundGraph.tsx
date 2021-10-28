@@ -60,7 +60,7 @@ class SoundGraph extends React.Component<Props, State> {
 
     render () {
             return (
-                <div style={{marginLeft:"150px"}}>
+                <div style={{margin:"150px"}}>
                     <ComposedChart width={this.width} height={this.height} onClick={this.handleClick} >
                         <Line type="monotone" dataKey="y" dot={false}  data={this.state.generatedPoints} />
                         <Scatter dataKey="y" fill="red" data={this.state.userPoints} />

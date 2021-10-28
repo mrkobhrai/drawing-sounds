@@ -26,6 +26,7 @@ class SoundGenerator {
     }
 
     generateSound = (points: {x: number, y: number}[]) => {
+        this.resetSound();
         const oscillator = this.oscillator;
         for(let i = 0; i < points.length; i++) {
             const point = points[i];
