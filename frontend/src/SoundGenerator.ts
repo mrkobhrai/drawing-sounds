@@ -27,13 +27,12 @@ class SoundGenerator {
 
     generateSound = (points: {x: number, y: number}[]) => {
         const oscillator = this.oscillator;
-
         for(let i = 0; i < points.length; i++) {
             const point = points[i];
             const x = point.x;
             const y = point.y;
             Tone.Transport.schedule((time) => {
-                oscillator.volume.value = y;
+                oscillator.frequency.value = y * 500;
                 if(i >= points.length - 1) {
                     this.oscillator.stop(time + 0.3);
                 }
