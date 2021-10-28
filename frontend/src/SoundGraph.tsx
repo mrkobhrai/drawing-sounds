@@ -1,5 +1,6 @@
+import { domain } from "process";
 import React from "react";
-import { LineChart, Line, XAxis, YAxis, Tooltip } from 'recharts';
+import { Line, XAxis, YAxis, Tooltip, ComposedChart, Scatter } from 'recharts';
 
 interface Props {
     width: number,
@@ -7,36 +8,48 @@ interface Props {
     getDataFunc: () => { x: number; y: number; }[]
 }
 
-class SoundGraph extends React.Component<Props> {
+interface State {
+    userPoints: { x: number; y: number; }[]
+}
+
+class SoundGraph extends React.Component<Props, State> {
     maxX = 5
     maxY = 10
     width = this.props.width
     height = this.props.height
-    
+    axisLength = 50
+
+    state: State = {
+        userPoints: []
+    }
+
     handleClick = (e:any) => {
         if (e) {
             const xCoord = e.chartX;
             const yCoord = e.chartY;
             const x = this.calcXFromXCoord(xCoord);
             const y = this.calcYFromYCoord(yCoord);
-            console.log(x, y);
+            console.log(xCoord, yCoord);
+            this.setState({ userPoints: [...this.state.userPoints, {x, y}]})
         }
     };
 
-    calcXFromXCoord = (xCoord: number) => xCoord / this.width * this.maxX
+    calcXFromXCoord = (xCoord: number) => (xCoord - this.axisLength) / (this.width - this.axisLength) * this.maxX
 
-    calcYFromYCoord = (yCoord: number) => this.maxY - (yCoord / this.height * this.maxY)
+    calcYFromYCoord = (yCoord: number) => this.maxY - (yCoord / (this.height - this.axisLength) * this.maxY)
 
     render () {
-            const data = this.props.getDataFunc();
+            const generatedData = this.props.getDataFunc();
+            const userData = this.state.userPoints;
             return (
                 <div style={{marginLeft:"150px"}}>
-                    <LineChart width={this.width} height={this.height} data={data} onClick={this.handleClick}>
-                        <Line type="monotone" dataKey="y" dot={false} />
-                        <XAxis dataKey="x" domain={[0, this.maxX]} />
-                        <YAxis domain={[0, this.maxY]} />
+                    <ComposedChart width={this.width} height={this.height} onClick={this.handleClick} >
+                        <Line type="monotone" dataKey="y" dot={false}  data={generatedData} />
+                        <Scatter dataKey="y" fill="red" data={userData} />
+                        <XAxis type="number" dataKey="x" domain={[0, this.maxX]} interval={0} tickCount={this.maxX + 1} height={this.axisLength} />
+                        <YAxis type="number" domain={[0, this.maxY]} interval={0} tickCount={this.maxY + 1} width={this.axisLength} />
                         <Tooltip />
-                    </LineChart>
+                    </ComposedChart>
                 </div>
             )
     }
