@@ -17,9 +17,8 @@ class SoundGenerator {
     playFromStart = () => {
         Tone.start();
         Tone.Transport.seconds = 0;
-        Tone.Transport.start(0);
-        this.oscillator.start(0);
-        this.oscillator.stop(5);
+        Tone.Transport.start();
+        this.oscillator.start();
     }
 
     resetSound = () => {
@@ -35,6 +34,9 @@ class SoundGenerator {
             const y = point.y;
             Tone.Transport.schedule((time) => {
                 oscillator.volume.value = y;
+                if(i >= points.length - 1) {
+                    this.oscillator.stop(time + 0.3);
+                }
             }, x);
         }
     }
