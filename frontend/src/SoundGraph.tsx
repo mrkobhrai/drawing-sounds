@@ -9,6 +9,7 @@ interface Props {
                             x: number;
                             y: number;
                         }[]) => void
+    resetSoundFunc: () => void
 }
 
 interface State {
@@ -48,13 +49,30 @@ class SoundGraph extends React.Component<Props, State> {
     }
 
     onPlot = async () => {
+        // Get the user points
         const userData = this.getUserPoints();
+        // Get the gaussian data
         const generatedData = (await this.props.getDataFunc(userData))[0];
+        // Calculate the distribution for the number of data points and X axis
         const xDistribution = this.maxX / generatedData.length;
+        // Filter returned values to be positive
         const structuredGeneratedData = generatedData.filter((y)=> y >= 0).map((y, i) => ({x: xDistribution * i, y: y}));
+        // Generate the sound
         this.props.soundGenFunc(structuredGeneratedData);
+        // Update the generated points state
         this.state.generatedPoints = structuredGeneratedData;
+        // Force a component rerender by updating the state
         this.setState({});
+    }
+
+    resetPoints = () => {
+        // Reset state
+        this.setState({
+            userPoints: [],
+            generatedPoints: []
+        });
+        // Clear the sound
+        this.props.resetSoundFunc();
     }
 
     render () {
