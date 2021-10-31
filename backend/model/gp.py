@@ -2,11 +2,11 @@ from typing import Callable
 
 import numpy as np
 
-from .kernels import negative_exponential_kernel
+from .kernels import exponentiated_quadratic_kernel, periodic_kernel
 
 class GaussianProcess:
     def __init__(self, x_range, n_datapoints: int,
-                 kernel: Callable=negative_exponential_kernel):
+                 kernel: Callable=periodic_kernel):
         self.x_range = x_range        
         self.n_datapoints = n_datapoints
         self.kernel = kernel
