@@ -6,7 +6,7 @@ from .kernels import exponentiated_quadratic_kernel, periodic_kernel
 
 class GaussianProcess:
     def __init__(self, x_range, n_datapoints: int,
-                 kernel: Callable=periodic_kernel):
+                 kernel: Callable=exponentiated_quadratic_kernel):
         self.x_range = x_range        
         self.n_datapoints = n_datapoints
         self.kernel = kernel
@@ -57,6 +57,6 @@ class GaussianProcess:
                 self.Lk.T, self.Lk))
 
         f_posterior = self.mu.reshape(-1, 1) + np.dot(
-            L, np.random.normal(size=(self.n_datapoints, n_samples))).reshape(-1)
+            L, np.random.normal(size=(self.n_datapoints, n_samples)))
 
         return f_posterior

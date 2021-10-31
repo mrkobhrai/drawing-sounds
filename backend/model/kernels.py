@@ -18,7 +18,7 @@ def rational_quadratic_kernel(a, b, lengthscale=1., alpha=1., amplitude=1.):
     return (amplitude ** 2) * dist
 
 
-def periodic_kernel(a, b, lengthscale=1., period=1., amplitude=1.):
+def periodic_kernel(a, b, lengthscale=0.1, period=0.1, amplitude=1.):
     a = a.reshape(-1)
     b = b.reshape(-1)
     dist = np.array([[np.pi * np.abs(a_i - b_j) / period for b_j in b] for a_i in a])
