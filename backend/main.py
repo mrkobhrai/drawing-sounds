@@ -5,7 +5,7 @@ from flask_cors import CORS
 
 
 app = Flask(__name__)
-cors = CORS(app, resources={r"/": {"origins": "http://localhost"}})
+cors = CORS(app, resources={r"/": {"origins": "http://localhost:3000"}})
 # TODO: Change the constant args to a modifiable parameter.
 gaussian_process = GaussianProcess(x_range=(0, 5), n_datapoints=1000)
 
