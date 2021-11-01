@@ -15,17 +15,7 @@ function App() {
   const [soundGenerator] = useState<SoundGenerator>(new SoundGenerator());
   const [pointFetcher] = useState<PointFetcher>(new PointFetcher());
   const [parameter, setParameter] = useState(1);
-  const [inputGraph] = useState(<SoundGraph
-      ref={graphRef}
-      soundGenFunc={soundGenerator.generateSound}
-      resetSoundFunc={soundGenerator.resetSound}
-      getDataFunc={pointFetcher.fetchData}
-      kernel='periodic'
-      minX={0}
-      maxX={5}
-      minY={20}
-      maxY={100}
-  />)
+  const [inputGraph] = useState(<SoundGraph ref={graphRef}  soundGenFunc={soundGenerator.generateSound} resetSoundFunc={soundGenerator.resetSound} getDataFunc={pointFetcher.fetchData} kernel='periodic'/>)
 
   const generateKernelDropdown: () => void = () => {
     const options = []
