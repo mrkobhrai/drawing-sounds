@@ -40,7 +40,7 @@ class SoundGraph extends React.Component<Props, State> {
         maxY: 10,
     }
 
-    handleClick = (e:any) => {
+    handleGraphClick = (e:any) => {
         if (e) {
             const xCoord = e.chartX;
             const yCoord = e.chartY;
@@ -50,6 +50,11 @@ class SoundGraph extends React.Component<Props, State> {
             this.onPlot();
         }
     };
+
+    handleXAxisSet = (e:any) => {
+        this.setState({maxX: parseInt(e.target.value)});
+        this.onPlot();
+    }
 
     calcXFromXCoord = (xCoord: number) => (xCoord - this.axisLength) / (this.width - this.axisLength) * this.state.maxX;
 
@@ -85,7 +90,6 @@ class SoundGraph extends React.Component<Props, State> {
         // Clear the sound
         this.props.resetSoundFunc();
     }
-      
 
     generateKernelDropdown: () => any = () => {
         const options = []
@@ -104,7 +108,7 @@ class SoundGraph extends React.Component<Props, State> {
     render () {
             return (
                 <div className="graph-container">
-                    <ComposedChart width={this.width} height={this.height} onClick={this.handleClick} >
+                    <ComposedChart width={this.width} height={this.height} onClick={this.handleGraphClick} >
                         <Line type="monotone" dataKey="y" dot={false}  data={this.state.generatedPoints} />
                         <Scatter dataKey="y" fill="red" data={this.state.userPoints} />
                         <XAxis type="number" dataKey="x" domain={[0, this.state.maxX]} interval={0} tickCount={this.state.maxX + 1} height={this.axisLength} />
@@ -132,9 +136,9 @@ class SoundGraph extends React.Component<Props, State> {
                             </td>
                             <td className="params" colSpan={2}>
                                 <label className="paramLabel">
-                                Axis Length
+                                X Axis Range ({this.state.maxX})
                                     <div className="slidecontainer">
-                                        <input type="range" min="1" max="20" onChange={(e)=>this.setState({maxX: parseInt(e.target.value)})} value={this.state.maxX} className="slider" id="myRange" />
+                                        <input type="range" min="1" max="20" onChange={(e)=>this.handleXAxisSet(e)} value={this.state.maxX} className="slider" id="myRange" />
                                     </div>
                                 </label>
                             </td>
