@@ -11,7 +11,6 @@ interface Props {
                             y: number;
                         }[]) => void
     resetSoundFunc: () => void
-    kernel: string
 }
 
 interface State {
@@ -35,7 +34,7 @@ class SoundGraph extends React.Component<Props, State> {
     state: State = {
         userPoints: [],
         generatedPoints: [],
-        kernel: this.props.kernel,
+        kernel: 'periodic',
     }
 
     handleClick = (e:any) => {
