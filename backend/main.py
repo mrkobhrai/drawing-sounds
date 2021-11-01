@@ -1,6 +1,6 @@
 from flask import Flask, request
 
-from model import GaussianProcess
+from model import GaussianProcess, periodic_kernel
 from flask_cors import CORS
 
 
@@ -17,6 +17,8 @@ def generate_handler():
     points = request_body['points']
     points = [(point[0], point[1]) for point in points]
     xs, ys = map(list, zip(*points))
+
+    print(gaussian_process.kernel)
 
     # Perform Gaussian process
     gaussian_process.update_data(xs, ys)

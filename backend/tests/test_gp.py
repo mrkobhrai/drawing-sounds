@@ -41,10 +41,6 @@ def test_update_data():
 def test_gaussian_process():
     gp = GaussianProcess((0, 5), 2)
     gp.update_data([[0], [1], [2]], [[1], [2], [5.5]])
-    print(gp.mu)
-    print(gp.Lk)
-    print(gp.K_)
-    print(gp.sigma)
     
     mu = np.array([[[9.99950662e-01], [1.57053351e-19]]])
     Lk = np.array([[ 9.99975001e-01, 5.16629148e-55],

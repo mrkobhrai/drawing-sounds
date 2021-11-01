@@ -5,8 +5,7 @@ import numpy as np
 from .kernels import exponentiated_quadratic_kernel, periodic_kernel
 
 class GaussianProcess:
-    def __init__(self, x_range, n_datapoints: int,
-                 kernel: Callable=exponentiated_quadratic_kernel):
+    def __init__(self, x_range, n_datapoints, kernel=periodic_kernel):
         self.x_range = x_range        
         self.n_datapoints = n_datapoints
         self.kernel = kernel
