@@ -84,7 +84,7 @@ class SoundGraph extends React.Component<Props, State> {
     }
       
 
-    generateKernelDropdown: () => void = () => {
+    generateKernelDropdown: () => any = () => {
         const options = []
         for (let [label, value] of Object.entries(kernels)) {
           options.push(<option label={label} value={value}/>)
@@ -98,7 +98,7 @@ class SoundGraph extends React.Component<Props, State> {
 
     render () {
             return (
-                <div style={{margin:"150px"}}>
+                <div className="graph-container">
                     <ComposedChart width={this.width} height={this.height} onClick={this.handleClick} >
                         <Line type="monotone" dataKey="y" dot={false}  data={this.state.generatedPoints} />
                         <Scatter dataKey="y" fill="red" data={this.state.userPoints} />

@@ -17,6 +17,7 @@ function App() {
   }
 
   return <div>
+    <h1>Designing Sounds By Drawing Them</h1>
     {inputGraph}
     <button onClick={() => graphRef.current?.resetPoints()}>RESET</button>
     <button onClick={soundGenerator.playFromStart}>PLAY</button>
