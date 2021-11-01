@@ -16,16 +16,19 @@ function App() {
     setParameter(parseFloat(event.target.value))
   }
 
-  return <div>
-    <h1>Designing Sounds By Drawing Them</h1>
-    {inputGraph}
-    <button onClick={() => graphRef.current?.resetPoints()}>RESET</button>
-    <button onClick={soundGenerator.playFromStart}>PLAY</button>
-    <div/>
-    <label> Parameter
-      <input type="number" min={0} max={10} step={0.5} value={parameter} onChange={updateParameter}/>
-      <input type="range" min={0} max={10} step={0.5} value={parameter} onChange={updateParameter}/>
-    </label>
-  </div>
+  return  (
+    <div>
+      <h1><b>Designing Sounds By Drawing Them</b></h1>
+      <h3><i>Made by 3rd Year Imperial College Computing Students</i></h3>
+      {inputGraph}
+      <button onClick={() => graphRef.current?.resetPoints()}>RESET</button>
+      <button onClick={soundGenerator.playFromStart}>PLAY</button>
+      <div/>
+      <label> Parameter
+        <input type="number" min={0} max={10} step={0.5} value={parameter} onChange={updateParameter}/>
+        <input type="range" min={0} max={10} step={0.5} value={parameter} onChange={updateParameter}/>
+      </label>
+    </div>
+  )
 }
 export default App;

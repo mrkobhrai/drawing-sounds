@@ -16,6 +16,11 @@ svg {
 
 select {
   display: block;
+  padding: 20px;
+  font-size: large;
+  font-weight: bold;
+  text-align: center;
+  width: 30vw;
 }
 
 div.graph-container {
@@ -24,4 +29,23 @@ div.graph-container {
   justify-content: center;
   width: 80vw;
   margin: 10vw;
+}
+
+table.params {
+  padding: 2%;
+  text-align: center;
+  align-items: center;
+  justify-content: center;
+  margin: auto;
+}
+
+td.params {
+  border: 2px solid black;
+  padding: 20px;
+  margin: 20px;
+  border-collapse: collapse;
+}
+
+label.paramLabel {
+  font-size: x-large;
 }

@@ -89,11 +89,16 @@ class SoundGraph extends React.Component<Props, State> {
         for (let [label, value] of Object.entries(kernels)) {
           options.push(<option label={label} value={value}/>)
         }
-        return <select onChange={(e) => {
-          this.setState({kernel: e.target.value})
-        }}>
-          {options}
-        </select>
+        return ( 
+            <label className="paramLabel">
+                Kernel Type
+                <select onChange={(e) => {
+                    this.setState({kernel: e.target.value})
+                    }}>
+                    {options}
+                </select>
+            </label>
+        )
     }
 
     render () {
@@ -106,7 +111,13 @@ class SoundGraph extends React.Component<Props, State> {
                         <YAxis type="number" domain={[0, this.maxY]} interval={0} tickCount={this.maxY + 1} width={this.axisLength} />
                         <Tooltip />
                     </ComposedChart>
-                    {this.generateKernelDropdown()}
+                    <table className="params">
+                        <tr>
+                            <td className="params">
+                            {this.generateKernelDropdown()}
+                            </td>
+                        </tr>
+                    </table>
                 </div>
             )
     }
