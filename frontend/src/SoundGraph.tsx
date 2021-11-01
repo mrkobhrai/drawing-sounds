@@ -1,20 +1,23 @@
 import React from "react";
 import { Line, XAxis, YAxis, Tooltip, ComposedChart, Scatter } from 'recharts';
+import {FetchDataBody} from "./PointFetcher";
 
 interface Props {
     width?: number,
     height?: number,
-    getDataFunc: (points: number[][]) => Promise<number[][]>
+    getDataFunc: (body: FetchDataBody) => Promise<number[][]>
     soundGenFunc: (points: {
                             x: number;
                             y: number;
                         }[]) => void
     resetSoundFunc: () => void
+    kernel: string
 }
 
 interface State {
     userPoints: { x: number; y: number; }[]
     generatedPoints: { x: number; y: number; }[]
+    kernel: string
 }
 
 class SoundGraph extends React.Component<Props, State> {
@@ -26,7 +29,8 @@ class SoundGraph extends React.Component<Props, State> {
 
     state: State = {
         userPoints: [],
-        generatedPoints: []
+        generatedPoints: [],
+        kernel: this.props.kernel,
     }
 
     handleClick = (e:any) => {
@@ -52,7 +56,7 @@ class SoundGraph extends React.Component<Props, State> {
         // Get the user points
         const userData = this.getUserPoints();
         // Get the gaussian data
-        const generatedData = (await this.props.getDataFunc(userData))[0];
+        const generatedData = (await this.props.getDataFunc({points: userData, kernel: this.state.kernel}))[0];
         // Calculate the distribution for the number of data points and X axis
         const xDistribution = this.maxX / generatedData.length;
         // Filter returned values to be positive

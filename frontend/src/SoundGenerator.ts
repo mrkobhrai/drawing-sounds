@@ -1,9 +1,6 @@
 import * as Tone from 'tone';
 import {Oscillator, PitchShift} from "tone";
 
-/**
- * @param {React.RefObject<InputGraph>} graphRef Reference to input graph
- */
 class SoundGenerator {
     oscillator: Oscillator;
     pitchShifter: PitchShift;

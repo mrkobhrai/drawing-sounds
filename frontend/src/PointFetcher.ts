@@ -1,9 +1,18 @@
 import axios from 'axios';
 
+export interface FetchDataBody {
+    points: number[][],
+    kernel: string,
+}
+
 class PointFetcher {
 
-    fetchData: (points: number[][]) => Promise<number[][]> = async (points: number[][]) => {
-        const postBody = { points };
+    fetchData: (body: FetchDataBody) => Promise<number[][]>
+        = async (body: FetchDataBody) => {
+        const postBody = {
+            points: body.points,
+            kernel: body.kernel,
+        };
         const data = await axios.post('http://localhost:5000/', postBody)
             .then(result => (result.data as any).samples)
             .catch((error) => { 
