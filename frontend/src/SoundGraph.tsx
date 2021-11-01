@@ -18,6 +18,8 @@ interface State {
     userPoints: { x: number; y: number; }[]
     generatedPoints: { x: number; y: number; }[]
     kernel: string
+    maxX: number,
+    maxY: number,
 }
 
 const kernels = {
@@ -26,8 +28,6 @@ const kernels = {
   }
 
 class SoundGraph extends React.Component<Props, State> {
-    maxX = 5
-    maxY = 10
     width = this.props.width ?? 1000
     height = this.props.height ?? 500
     axisLength = 50
@@ -36,6 +36,8 @@ class SoundGraph extends React.Component<Props, State> {
         userPoints: [],
         generatedPoints: [],
         kernel: 'periodic',
+        maxX: 5,
+        maxY: 10,
     }
 
     handleClick = (e:any) => {
@@ -49,9 +51,9 @@ class SoundGraph extends React.Component<Props, State> {
         }
     };
 
-    calcXFromXCoord = (xCoord: number) => (xCoord - this.axisLength) / (this.width - this.axisLength) * this.maxX;
+    calcXFromXCoord = (xCoord: number) => (xCoord - this.axisLength) / (this.width - this.axisLength) * this.state.maxX;
 
-    calcYFromYCoord = (yCoord: number) => this.maxY - (yCoord / (this.height - this.axisLength) * this.maxY);
+    calcYFromYCoord = (yCoord: number) => this.state.maxY - (yCoord / (this.height - this.axisLength) * this.state.maxY);
 
     getUserPoints: () => number[][] = () => {
         return this.state.userPoints.map(point => [point.x, point.y])
@@ -63,7 +65,7 @@ class SoundGraph extends React.Component<Props, State> {
         // Get the gaussian data
         const generatedData = (await this.props.getDataFunc({points: userData, kernel: this.state.kernel}))[0];
         // Calculate the distribution for the number of data points and X axis
-        const xDistribution = this.maxX / generatedData.length;
+        const xDistribution = this.state.maxX / generatedData.length;
         // Filter returned values to be positive
         const structuredGeneratedData = generatedData.filter((y)=> y >= 0).map((y, i) => ({x: xDistribution * i, y: y}));
         // Generate the sound
@@ -91,14 +93,11 @@ class SoundGraph extends React.Component<Props, State> {
           options.push(<option label={label} value={value}/>)
         }
         return ( 
-            <label className="paramLabel">
-                Kernel Type
                 <select onChange={(e) => {
                     this.setState({kernel: e.target.value})
                     }}>
                     {options}
                 </select>
-            </label>
         )
     }
 
@@ -108,8 +107,8 @@ class SoundGraph extends React.Component<Props, State> {
                     <ComposedChart width={this.width} height={this.height} onClick={this.handleClick} >
                         <Line type="monotone" dataKey="y" dot={false}  data={this.state.generatedPoints} />
                         <Scatter dataKey="y" fill="red" data={this.state.userPoints} />
-                        <XAxis type="number" dataKey="x" domain={[0, this.maxX]} interval={0} tickCount={this.maxX + 1} height={this.axisLength} />
-                        <YAxis type="number" domain={[0, this.maxY]} interval={0} tickCount={this.maxY + 1} width={this.axisLength} />
+                        <XAxis type="number" dataKey="x" domain={[0, this.state.maxX]} interval={0} tickCount={this.state.maxX + 1} height={this.axisLength} />
+                        <YAxis type="number" domain={[0, this.state.maxY]} interval={0} tickCount={this.state.maxY + 1} width={this.axisLength} />
                         <Tooltip />
                     </ComposedChart>
                     <table className="params">
@@ -126,7 +125,18 @@ class SoundGraph extends React.Component<Props, State> {
                         </tr>
                         <tr>
                             <td className="params">
-                            {this.generateKernelDropdown()}
+                                <label className="paramLabel">
+                                Kernel Type
+                                {this.generateKernelDropdown()}
+                                </label>
+                            </td>
+                            <td className="params" colSpan={2}>
+                                <label className="paramLabel">
+                                Axis Length
+                                    <div className="slidecontainer">
+                                        <input type="range" min="1" max="20" onChange={(e)=>this.setState({maxX: parseInt(e.target.value)})} value={this.state.maxX} className="slider" id="myRange" />
+                                    </div>
+                                </label>
                             </td>
                         </tr>
                     </table>
