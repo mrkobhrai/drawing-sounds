@@ -33,7 +33,7 @@ class SoundGenerator {
             const x = point.x;
             const y = point.y;
             Tone.Transport.schedule((time) => {
-                oscillator.frequency.value = y * 500;
+                oscillator.volume.value = y + 10;
                 if(i >= points.length - 1) {
                     this.oscillator.stop(time + 0.3);
                 }
