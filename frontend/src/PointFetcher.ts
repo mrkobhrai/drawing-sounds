@@ -18,9 +18,6 @@ class PointFetcher {
         console.log("Hi")
         const data = await axios.post('http://localhost:5000/', postBody, {cancelToken: this.cancelToken})
             .then(result => (result.data as any).samples)
-            .catch((error) => {
-                return [[]];
-            });
         return data
     }
 }
