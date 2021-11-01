@@ -20,6 +20,11 @@ interface State {
     kernel: string
 }
 
+const kernels = {
+    'Periodic': 'periodic',
+    'Square Rational': 'sqrat',
+  }
+
 class SoundGraph extends React.Component<Props, State> {
     maxX = 5
     maxY = 10
@@ -78,6 +83,19 @@ class SoundGraph extends React.Component<Props, State> {
         // Clear the sound
         this.props.resetSoundFunc();
     }
+      
+
+    generateKernelDropdown: () => void = () => {
+        const options = []
+        for (let [label, value] of Object.entries(kernels)) {
+          options.push(<option label={label} value={value}/>)
+        }
+        return <select onChange={(e) => {
+          this.setState({kernel: e.target.value})
+        }}>
+          {options}
+        </select>
+    }
 
     render () {
             return (
@@ -89,6 +107,7 @@ class SoundGraph extends React.Component<Props, State> {
                         <YAxis type="number" domain={[0, this.maxY]} interval={0} tickCount={this.maxY + 1} width={this.axisLength} />
                         <Tooltip />
                     </ComposedChart>
+                    {this.generateKernelDropdown()}
                 </div>
             )
     }
