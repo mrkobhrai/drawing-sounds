@@ -11,6 +11,7 @@ interface Props {
                             y: number;
                         }[]) => void
     resetSoundFunc: () => void
+    playSoundFunc: () => void
 }
 
 interface State {
@@ -112,6 +113,17 @@ class SoundGraph extends React.Component<Props, State> {
                         <Tooltip />
                     </ComposedChart>
                     <table className="params">
+                        <tr>
+                            <td className="params">
+                                <button onClick={this.onPlot}>Resample Graph</button>
+                            </td>
+                            <td className="params">
+                                <button onClick={this.resetPoints}>Reset Graph</button>
+                            </td>
+                            <td className="params">
+                                <button onClick={this.props.playSoundFunc}>PLAY</button>
+                            </td>
+                        </tr>
                         <tr>
                             <td className="params">
                             {this.generateKernelDropdown()}

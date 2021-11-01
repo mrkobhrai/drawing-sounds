@@ -14,19 +14,21 @@ svg {
   }
 }
 
-select {
+select, button {
   display: block;
   padding: 20px;
   font-size: large;
   font-weight: bold;
   text-align: center;
-  width: 30vw;
+  width: 20vw;
+  background-color: black;
+  color: white;
 }
 
 div.graph-container {
   text-align: center;
   align-items: center;
-  justify-content: center;
+  justify-content: left;
   width: 80vw;
   margin: 10vw;
 }
@@ -37,6 +39,7 @@ table.params {
   align-items: center;
   justify-content: center;
   margin: auto;
+  width: 50vw;
 }
 
 td.params {
@@ -48,4 +51,9 @@ td.params {
 
 label.paramLabel {
   font-size: x-large;
+}
+
+svg {
+  display: block;
+  margin: auto;
 }

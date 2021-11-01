@@ -10,7 +10,7 @@ function App() {
   const [soundGenerator] = useState<SoundGenerator>(new SoundGenerator());
   const [pointFetcher] = useState<PointFetcher>(new PointFetcher());
   const [parameter, setParameter] = useState(1);
-  const [inputGraph] = useState(<SoundGraph ref={graphRef}  soundGenFunc={soundGenerator.generateSound} resetSoundFunc={soundGenerator.resetSound} getDataFunc={pointFetcher.fetchData} />)
+  const [inputGraph] = useState(<SoundGraph ref={graphRef}  soundGenFunc={soundGenerator.generateSound} resetSoundFunc={soundGenerator.resetSound} getDataFunc={pointFetcher.fetchData} playSoundFunc={soundGenerator.playFromStart} />)
 
   const updateParameter: (event: ChangeEvent<HTMLInputElement>) => void = (event) => {
     setParameter(parseFloat(event.target.value))
@@ -21,8 +21,6 @@ function App() {
       <h1><b>Designing Sounds By Drawing Them</b></h1>
       <h3><i>Made by 3rd Year Imperial College Computing Students</i></h3>
       {inputGraph}
-      <button onClick={() => graphRef.current?.resetPoints()}>RESET</button>
-      <button onClick={soundGenerator.playFromStart}>PLAY</button>
       <div/>
       <label> Parameter
         <input type="number" min={0} max={10} step={0.5} value={parameter} onChange={updateParameter}/>
