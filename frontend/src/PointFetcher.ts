@@ -6,6 +6,8 @@ export interface FetchDataBody {
 }
 
 class PointFetcher {
+    source = axios.CancelToken.source();
+    cancelToken = this.source.token;
 
     fetchData: (body: FetchDataBody) => Promise<number[][]>
         = async (body: FetchDataBody) => {
@@ -13,9 +15,10 @@ class PointFetcher {
             points: body.points,
             kernel: body.kernel,
         };
-        const data = await axios.post('http://localhost:5000/', postBody)
+        console.log("Hi")
+        const data = await axios.post('http://localhost:5000/', postBody, {cancelToken: this.cancelToken})
             .then(result => (result.data as any).samples)
-            .catch((error) => { 
+            .catch((error) => {
                 return [[]];
             });
         return data
