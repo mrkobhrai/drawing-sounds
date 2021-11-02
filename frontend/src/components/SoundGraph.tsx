@@ -4,6 +4,7 @@ import {FetchDataBody} from "../utils/PointFetcher";
 import Slider from "./Slider";
 import Dropdown from "./Dropdown";
 import Button from "./Button";
+import {Kernel, kernels, periodicKernel} from "../utils/Kernel";
 
 interface Props {
     width?: number,
@@ -20,16 +21,11 @@ interface Props {
 interface State {
     userPoints: { x: number; y: number; }[]
     generatedPoints: { x: number; y: number; }[]
-    kernel: string,
+    kernel: Kernel,
     lengthScale: number,
     maxX: number,
     maxY: number,
 }
-
-const kernels = new Map([
-    ['Periodic', 'periodic'],
-    ['Square Rational', 'sqrat'],
-  ])
 
 class SoundGraph extends React.Component<Props, State> {
     width = this.props.width ?? 1000
@@ -39,7 +35,7 @@ class SoundGraph extends React.Component<Props, State> {
     state: State = {
         userPoints: [],
         generatedPoints: [],
-        kernel: 'periodic',
+        kernel: periodicKernel,
         lengthScale: 1,
         maxX: 5,
         maxY: 10,
@@ -78,7 +74,7 @@ class SoundGraph extends React.Component<Props, State> {
         // Get the user points
         const userData = this.getUserPoints();
         // Get the gaussian data
-        const generatedData = (await this.props.getDataFunc({points: userData, kernel: this.state.kernel}))[0];
+        const generatedData = (await this.props.getDataFunc({points: userData, kernel: this.state.kernel.name}))[0];
         // Calculate the distribution for the number of data points and X axis
         const xDistribution = this.state.maxX / generatedData.length;
         // Filter returned values to be positive
@@ -101,12 +97,20 @@ class SoundGraph extends React.Component<Props, State> {
         this.props.resetSoundFunc();
     }
 
-    generateKernelDropdown = () => {
-        return <label className="paramLabel">
-            <Dropdown keyVals={kernels} onChange={(e) => {
-                this.setState({kernel: e.target.value})
-            }}/>
-        </label>
+    generateKernelDropdownAndParameters = () => {
+        return <tr>
+            <td className="params">
+                <label className="paramLabel">
+                    <Dropdown keyVals={new Map(kernels.map(kernel => [kernel.label, kernel.name]))} onChange={(e) => {
+                        this.setState({kernel: kernels.find(kernel => kernel.name == e.target.value)!})
+                    }}/>
+                </label>
+                {this.state.kernel.parameters.map(param => {
+                    return <Slider name={param.name} min={param.min} max={param.max} value={10} onChange={(e) => {}}/>
+                })}
+            </td>
+        </tr>
+
     }
 
     generateTable: () => JSX.Element = () => {
@@ -123,12 +127,12 @@ class SoundGraph extends React.Component<Props, State> {
                 </td>
             </tr>
             <tr>
-                <td className="params">
-                    {this.generateKernelDropdown()}
-                </td>
-                <td className="params" colSpan={2}>
+                <td className="params" colSpan={3}>
                     <Slider name={`X Axis Range (${this.state.maxX})`} min={1} max={20} value={this.state.maxX} onChange={(e) => this.handleXAxisSet(e)}/>
                 </td>
+            </tr>
+            <tr>
+                {this.generateKernelDropdownAndParameters()}
             </tr>
             <tr>
                 <td className={"params"}>
