@@ -1,6 +1,7 @@
 import React from "react";
 import { Line, XAxis, YAxis, Tooltip, ComposedChart, Scatter } from 'recharts';
-import {FetchDataBody} from "./PointFetcher";
+import {FetchDataBody} from "../utils/PointFetcher";
+import Slider from "./Slider";
 
 interface Props {
     width?: number,
@@ -17,7 +18,8 @@ interface Props {
 interface State {
     userPoints: { x: number; y: number; }[]
     generatedPoints: { x: number; y: number; }[]
-    kernel: string
+    kernel: string,
+    lengthScale: number,
     maxX: number,
     maxY: number,
 }
@@ -36,6 +38,7 @@ class SoundGraph extends React.Component<Props, State> {
         userPoints: [],
         generatedPoints: [],
         kernel: 'periodic',
+        lengthScale: 1,
         maxX: 5,
         maxY: 10,
     }
@@ -53,6 +56,11 @@ class SoundGraph extends React.Component<Props, State> {
 
     handleXAxisSet = (e:any) => {
         this.setState({maxX: parseInt(e.target.value)});
+        this.onPlot();
+    }
+
+    handleLengthscaleSet = (e:any) => {
+        this.setState({lengthScale: parseInt(e.target.value)});
         this.onPlot();
     }
 
@@ -135,12 +143,12 @@ class SoundGraph extends React.Component<Props, State> {
                                 </label>
                             </td>
                             <td className="params" colSpan={2}>
-                                <label className="paramLabel">
-                                X Axis Range ({this.state.maxX})
-                                    <div className="slidecontainer">
-                                        <input type="range" min="1" max="20" onChange={(e)=>this.handleXAxisSet(e)} value={this.state.maxX} className="slider" id="myRange" />
-                                    </div>
-                                </label>
+                                <Slider name={`X Axis Range (${this.state.maxX})`} min={1} max={20} value={this.state.maxX} onChange={(e) => this.handleXAxisSet(e)}/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td className={"params"}>
+                                <Slider name={`Length Scale (${this.state.lengthScale})`} min={0} max={10} value={this.state.lengthScale} onChange={(e) => this.handleLengthscaleSet(e)}/>
                             </td>
                         </tr>
                     </table>
