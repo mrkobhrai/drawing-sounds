@@ -2,6 +2,8 @@ import React from "react";
 import { Line, XAxis, YAxis, Tooltip, ComposedChart, Scatter } from 'recharts';
 import {FetchDataBody} from "../utils/PointFetcher";
 import Slider from "./Slider";
+import Dropdown from "./Dropdown";
+import Button from "./Button";
 
 interface Props {
     width?: number,
@@ -24,10 +26,10 @@ interface State {
     maxY: number,
 }
 
-const kernels = {
-    'Periodic': 'periodic',
-    'Square Rational': 'sqrat',
-  }
+const kernels = new Map([
+    ['Periodic', 'periodic'],
+    ['Square Rational', 'sqrat'],
+  ])
 
 class SoundGraph extends React.Component<Props, State> {
     width = this.props.width ?? 1000
@@ -99,18 +101,41 @@ class SoundGraph extends React.Component<Props, State> {
         this.props.resetSoundFunc();
     }
 
-    generateKernelDropdown: () => any = () => {
-        const options = []
-        for (let [label, value] of Object.entries(kernels)) {
-          options.push(<option label={label} value={value}/>)
-        }
-        return ( 
-                <select onChange={(e) => {
-                    this.setState({kernel: e.target.value})
-                    }}>
-                    {options}
-                </select>
-        )
+    generateKernelDropdown = () => {
+        return <label className="paramLabel">
+            <Dropdown keyVals={kernels} onChange={(e) => {
+                this.setState({kernel: e.target.value})
+            }}/>
+        </label>
+    }
+
+    generateTable: () => JSX.Element = () => {
+        return <table className="params">
+            <tr>
+                <td className="params">
+                    <Button label="Resample Graph" onChange={this.onPlot}/>
+                </td>
+                <td className="params">
+                    <Button label="Reset Graph" onChange={this.resetPoints}/>
+                </td>
+                <td className="params">
+                    <Button label="PLAY" onChange={this.props.playSoundFunc}/>
+                </td>
+            </tr>
+            <tr>
+                <td className="params">
+                    {this.generateKernelDropdown()}
+                </td>
+                <td className="params" colSpan={2}>
+                    <Slider name={`X Axis Range (${this.state.maxX})`} min={1} max={20} value={this.state.maxX} onChange={(e) => this.handleXAxisSet(e)}/>
+                </td>
+            </tr>
+            <tr>
+                <td className={"params"}>
+                    <Slider name={`Length Scale (${this.state.lengthScale})`} min={0} max={10} value={this.state.lengthScale} onChange={(e) => this.handleLengthscaleSet(e)}/>
+                </td>
+            </tr>
+        </table>
     }
 
     render () {
@@ -123,35 +148,7 @@ class SoundGraph extends React.Component<Props, State> {
                         <YAxis type="number" domain={[0, this.state.maxY]} interval={0} tickCount={this.state.maxY + 1} width={this.axisLength} />
                         <Tooltip />
                     </ComposedChart>
-                    <table className="params">
-                        <tr>
-                            <td className="params">
-                                <button onClick={this.onPlot}>Resample Graph</button>
-                            </td>
-                            <td className="params">
-                                <button onClick={this.resetPoints}>Reset Graph</button>
-                            </td>
-                            <td className="params">
-                                <button onClick={this.props.playSoundFunc}>PLAY</button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td className="params">
-                                <label className="paramLabel">
-                                Kernel Type
-                                {this.generateKernelDropdown()}
-                                </label>
-                            </td>
-                            <td className="params" colSpan={2}>
-                                <Slider name={`X Axis Range (${this.state.maxX})`} min={1} max={20} value={this.state.maxX} onChange={(e) => this.handleXAxisSet(e)}/>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td className={"params"}>
-                                <Slider name={`Length Scale (${this.state.lengthScale})`} min={0} max={10} value={this.state.lengthScale} onChange={(e) => this.handleLengthscaleSet(e)}/>
-                            </td>
-                        </tr>
-                    </table>
+                    {this.generateTable()}
                 </div>
             )
     }
