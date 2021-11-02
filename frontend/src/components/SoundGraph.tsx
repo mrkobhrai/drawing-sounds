@@ -134,11 +134,6 @@ class SoundGraph extends React.Component<Props, State> {
             <tr>
                 {this.generateKernelDropdownAndParameters()}
             </tr>
-            <tr>
-                <td className={"params"}>
-                    <Slider name={`Length Scale (${this.state.lengthScale})`} min={0} max={10} value={this.state.lengthScale} onChange={(e) => this.handleLengthscaleSet(e)}/>
-                </td>
-            </tr>
         </table>
     }
 
