@@ -22,6 +22,7 @@ interface State {
     userPoints: { x: number; y: number; }[]
     generatedPoints: { x: number; y: number; }[]
     kernel: Kernel,
+    params: Map<string, number>,
     lengthScale: number,
     maxX: number,
     maxY: number,
@@ -36,6 +37,7 @@ class SoundGraph extends React.Component<Props, State> {
         userPoints: [],
         generatedPoints: [],
         kernel: periodicKernel,
+        params: new Map(),
         lengthScale: 1,
         maxX: 5,
         maxY: 10,
@@ -74,7 +76,7 @@ class SoundGraph extends React.Component<Props, State> {
         // Get the user points
         const userData = this.getUserPoints();
         // Get the gaussian data
-        const generatedData = (await this.props.getDataFunc({points: userData, kernel: this.state.kernel.name}))[0];
+        const generatedData = (await this.props.getDataFunc({points: userData, kernel: this.state.kernel.name, params: this.state.params}))[0];
         // Calculate the distribution for the number of data points and X axis
         const xDistribution = this.state.maxX / generatedData.length;
         // Filter returned values to be positive
@@ -88,13 +90,11 @@ class SoundGraph extends React.Component<Props, State> {
     }
 
     resetPoints = () => {
-        // Reset state
-        this.setState({
-            userPoints: [],
-            generatedPoints: []
-        });
-        // Clear the sound
+        this.state.userPoints.splice(0, this.state.userPoints.length)
+        this.state.generatedPoints.splice(0, this.state.generatedPoints.length)
+        this.state.params.clear()
         this.props.resetSoundFunc();
+        this.setState({})
     }
 
     generateKernelDropdownAndParameters = () => {
@@ -102,11 +102,19 @@ class SoundGraph extends React.Component<Props, State> {
             <td className="params">
                 <label className="paramLabel">
                     <Dropdown keyVals={new Map(kernels.map(kernel => [kernel.label, kernel.name]))} onChange={(e) => {
+                        this.resetPoints()
+                        this.state.params.clear()
                         this.setState({kernel: kernels.find(kernel => kernel.name == e.target.value)!})
                     }}/>
                 </label>
                 {this.state.kernel.parameters.map(param => {
-                    return <Slider name={param.name} min={param.min} max={param.max} value={10} onChange={(e) => {}}/>
+                    if (!this.state.params.has(param.name)) {
+                        this.state.params.set(param.name, param.default)
+                    }
+                    return <Slider key={param.name} name={param.label} min={param.min} max={param.max} value={this.state.params.get(param.name)!} onChange={(e) => {
+                        this.state.params.set(param.name, parseInt(e.target.value))
+                        this.setState({})
+                    }}/>
                 })}
             </td>
         </tr>
@@ -115,25 +123,25 @@ class SoundGraph extends React.Component<Props, State> {
 
     generateTable: () => JSX.Element = () => {
         return <table className="params">
-            <tr>
-                <td className="params">
-                    <Button label="Resample Graph" onChange={this.onPlot}/>
-                </td>
-                <td className="params">
-                    <Button label="Reset Graph" onChange={this.resetPoints}/>
-                </td>
-                <td className="params">
-                    <Button label="PLAY" onChange={this.props.playSoundFunc}/>
-                </td>
-            </tr>
-            <tr>
-                <td className="params" colSpan={3}>
-                    <Slider name={`X Axis Range (${this.state.maxX})`} min={1} max={20} value={this.state.maxX} onChange={(e) => this.handleXAxisSet(e)}/>
-                </td>
-            </tr>
-            <tr>
+            <tbody>
+                <tr>
+                    <td className="params">
+                        <Button label="Resample Graph" onChange={this.onPlot}/>
+                    </td>
+                    <td className="params">
+                        <Button label="Reset Graph" onChange={this.resetPoints}/>
+                    </td>
+                    <td className="params">
+                        <Button label="PLAY" onChange={this.props.playSoundFunc}/>
+                    </td>
+                </tr>
+                <tr>
+                    <td className="params" colSpan={3}>
+                        <Slider name={`X Axis Range`} min={1} max={20} value={this.state.maxX} onChange={(e) => this.handleXAxisSet(e)}/>
+                    </td>
+                </tr>
                 {this.generateKernelDropdownAndParameters()}
-            </tr>
+            </tbody>
         </table>
     }
 

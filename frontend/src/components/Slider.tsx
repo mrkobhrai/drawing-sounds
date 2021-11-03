@@ -11,8 +11,8 @@ interface Props {
 
 const Slider = (props: Props): JSX.Element => {
     return <label className="paramLabel">
-        {props.name}
-        <input type="range" min={props.min} max={props.max} step={props.step ?? 1} value={props.value} onChange={props.onChange} className="slider"/>
+        {`${props.name}: ${props.value}`}
+        <input type="range" min={props.min} max={props.max} step={props.step ?? 1} value={props.value} onChange={props.onChange}  className="slider"/>
     </label>
 }
 

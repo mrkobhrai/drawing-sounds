@@ -3,6 +3,7 @@ export interface Parameter {
     label: string
     min: number
     max: number
+    default: number
 }
 
 export const lengthScaleParam: Parameter = {
@@ -10,6 +11,7 @@ export const lengthScaleParam: Parameter = {
     label: 'Length Scale',
     min: 0,
     max: 10,
+    default: 1,
 }
 
 export const amplitudeParam: Parameter = {
@@ -17,6 +19,7 @@ export const amplitudeParam: Parameter = {
     label: 'Amplitude',
     min: 0,
     max: 10,
+    default: 1,
 }
 
 export const periodParam: Parameter = {
@@ -24,6 +27,7 @@ export const periodParam: Parameter = {
     label: 'Period',
     min: 0,
     max: 10,
+    default: 1,
 }
 
 export const alphaParam: Parameter = {
@@ -31,6 +35,7 @@ export const alphaParam: Parameter = {
     label: 'Alpha',
     min: 0,
     max: 10,
+    default: 1,
 }
 
 export const periodicLengthScaleParam: Parameter = {
@@ -38,6 +43,7 @@ export const periodicLengthScaleParam: Parameter = {
     label: 'Periodic Length Scale',
     min: 0,
     max: 10,
+    default: 1,
 }
 
 export const localLengthScaleParam: Parameter = {
@@ -45,4 +51,5 @@ export const localLengthScaleParam: Parameter = {
     label: 'Local length Scale',
     min: 0,
     max: 10,
+    default: 1,
 }
