@@ -1,6 +1,6 @@
 from flask import Flask, request
 
-from model import GaussianProcess, periodic_kernel
+from model import GaussianProcess, parse_kernel
 from flask_cors import CORS
 
 
@@ -9,16 +9,22 @@ cors = CORS(app, resources={r"/": {"origins": "http://localhost:3000"}})
 # TODO: Change the constant args to a modifiable parameter.
 gaussian_process = GaussianProcess(x_range=(0, 5), n_datapoints=1000)
 
-print("Test1")
-
 @app.route('/', methods=['POST'])
 def generate_handler():
-    print("Test")    
-    # Process input points
     request_body = request.get_json()
+    
+    # Process input points
     points = request_body['points']
     points = [(point[0], point[1]) for point in points]
     xs, ys = map(list, zip(*points))
+
+    # Set kernel and its parameters
+    kernel_name = request_body.get('kernel')
+    if kernel_name is None:
+        kernel_name = 'periodic_kernel'
+    params = request_body
+    kernel = parse_kernel(kernel_name, params)
+    gaussian_process.kernel = kernel
 
     # Perform Gaussian process
     gaussian_process.update_data(xs, ys)

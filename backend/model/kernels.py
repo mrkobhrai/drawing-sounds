@@ -117,3 +117,43 @@ class SpectralMixtureKernel(Kernel):
 
     def __call__(self, a, b):
         pass
+
+def parse_kernel(kernel_name, params):
+    if kernel_name == 'exponentiated_quadratic_kernel':
+        kernel = SquaredExponentialKernel()
+        
+        lengthscale = params.get('lengthscale')
+        amplitude = params.get('amplitude')
+        kernel.update_params(lengthscale, amplitude)
+        
+        return kernel
+    elif kernel_name == 'rational_quadratic_kernel':
+        kernel = RationalQuadraticKernel()
+        
+        lengthscale = params.get('lengthscale')
+        alpha = params.get('alpha')
+        amplitude = params.get('amplitude')
+        kernel.update_params(lengthscale, alpha, amplitude)
+        
+        return kernel
+    elif kernel_name == 'periodic_kernel':
+        kernel = PeriodicKernel()
+        
+        lengthscale = params.get('lengthscale')
+        period = params.get('period')
+        amplitude = params.get('amplitude')
+        kernel.update_params(lengthscale, period, amplitude)
+        
+        return kernel
+    elif kernel_name == 'local_periodic_kernel':
+        kernel = LocalPeriodicKernel()
+        
+        periodic_lengthscale = params.get('periodic_lengthscale')
+        period = params.get('period')
+        local_lengthscale = params.get('local_lengthscale')
+        amplitude = params.get('amplitude')
+        kernel.update_params(periodic_lengthscale, period, local_lengthscale, amplitude)
+        
+        return kernel
+    else:
+        return None
