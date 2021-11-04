@@ -1,39 +1,119 @@
 import numpy as np
 
 
-def exponentiated_quadratic_kernel(a, b, lengthscale=1., amplitude=1.):
+class Kernel:
+    def __init__(self):
+        pass
+
+    def update_params(self):
+        pass
+
+    def __call__(self, a, b):
+        pass
+
     
-    sqdist = np.sum(a**2, 1).reshape(-1, 1) + \
-        np.sum(b**2, 1) - 2 * np.dot(a, b.T)
-    return (amplitude ** 2) * np.exp(-.5 * (1 / lengthscale) * sqdist)
+class SquaredExponentialKernel(Kernel):
+    def __init__(self, lengthscale=1., amplitude=1.):
+        self.lengthscale = lengthscale
+        self.amplitude = amplitude
 
+    def update_params(self, lengthscale, amplitude):
+        if not lengthscale:
+            self.lengthscale = lengthscale
+        if not amplitude:
+            self.amplitude = amplitude
 
-def rational_quadratic_kernel(a, b, lengthscale=1., alpha=1., amplitude=1.):
-    sqdist = np.sum(a**2, 1).reshape(-1, 1) + \
-        np.sum(b**2, 1) - 2 * np.dot(a, b.T)
+    def __call__(self, a, b):
+        sqdist = np.sum(a**2, 1).reshape(-1, 1) + \
+            np.sum(b**2, 1) - 2 * np.dot(a, b.T)
+
+        return (self.amplitude ** 2) * np.exp(
+            -.5 * (1 / self.lengthscale) * sqdist)
+        
+
+class RationalQuadraticKernel(Kernel):
+    def __init__(self, lengthscale=1., alpha=1., amplitude=1.):
+        self.lengthscale = lengthscale
+        self.alpha = alpha
+        self.amplitude = amplitude
+
+    def update_params(self, lengthscale, alpha, amplitude):
+        if not lengthscale:
+            self.lengthscale = lengthscale
+        if not alpha:
+            self.alpha = alpha
+        if not amplitude:
+            self.amplitude = amplitude
     
-    dist = np.float_power(
-        1. + (1 / (2 * alpha * (lengthscale ** 2))) * sqdist, -alpha)
+    def __call__(self, a, b):
+        sqdist = np.sum(a**2, 1).reshape(-1, 1) + \
+            np.sum(b**2, 1) - 2 * np.dot(a, b.T)
+        
+        dist = np.float_power(
+            1. + (1 / (2 * self.alpha * (self.lengthscale ** 2))) * sqdist,
+            -self.alpha)
+        
+        return (self.amplitude ** 2) * dist
+
+        
+class PeriodicKernel(Kernel):
+    def __init__(self, lengthscale=1., period=1., amplitude=1.):
+        self.lengthscale = lengthscale
+        self.period = period
+        self.amplitude = amplitude
+
+    def update_params(self, lengthscale, period, amplitude):
+        if not lengthscale:
+            self.lengthscale = lengthscale
+        if not period:
+            self.period = period
+        if not amplitude:
+            self.amplitude = amplitude
     
-    return (amplitude ** 2) * dist
+    def __call__(self, a, b):
+        a = a.reshape(-1)
+        b = b.reshape(-1)
+        dist = np.array([[np.pi * np.abs(
+            a_i - b_j) / self.period for b_j in b] for a_i in a])
+
+        return (self.amplitude ** 2) * np.exp(
+            (-2 / (self.lengthscale**2)) * (np.sin(dist) ** 2))
 
 
-def periodic_kernel(a, b, lengthscale=1., period=1., amplitude=1.):
-    a = a.reshape(-1)
-    b = b.reshape(-1)
-    dist = np.array([[np.pi * np.abs(a_i - b_j) / period for b_j in b] for a_i in a])
+class LocalPeriodicKernel(Kernel):
+    def __init__(self, periodic_lengthscale=1., period=1., 
+                 local_lengthscale=1., amplitude=1.):
+        self.periodic_lengthscale = periodic_lengthscale
+        self.period = period
+        self.local_lengthscale = local_lengthscale
+        self.amplitude = amplitude
 
-    return (amplitude ** 2) * np.exp(
-        (-2 / (lengthscale**2)) * (np.sin(dist) ** 2))
+        self.periodic = PeriodicKernel(
+            self.periodic_lengthscale, self.period, self.amplitude)
+        self.local = SquaredExponentialKernel(
+            self.local_lengthscale, self.amplitude)
+
+    def update_params(self, periodic_lengthscale, period, 
+                      local_lengthscale, amplitude):
+        if not periodic_lengthscale:
+            self.periodic_lengthscale = periodic_lengthscale
+        if not period:
+            self.period = period
+        if not local_lengthscale:
+            self.local_lengthscale = local_lengthscale
+        if not amplitude:
+            self.amplitude = amplitude
+
+        self.periodic.update_params(periodic_lengthscale, period, amplitude)
+        self.local.update_params(local_lengthscale, amplitude)
+
+    def __call__(self, a, b):
+        return self.periodic(a, b) * self.local(a, b)
 
 
-def local_periodic_kernel(a, b, periodic_lengthscale=1., period=1., 
-                          local_lengthscale=1., amplitude=1.):
-    periodic = periodic_kernel(a, b, periodic_lengthscale, period, amplitude)
-    local = exponentiated_quadratic_kernel(a, b, local_lengthscale, amplitude)
+class SpectralMixtureKernel(Kernel):
+    def __init__(self):
+        pass
 
-    return periodic * local
-
-
-def spectral_mixture_kernel(a, b, l=0.1):
-    pass
+    def __call__(self, a, b):
+        pass
