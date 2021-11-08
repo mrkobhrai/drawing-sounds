@@ -5,6 +5,7 @@ import Slider from "./Slider";
 import Dropdown from "./Dropdown";
 import Button from "./Button";
 import {Kernel, kernels, periodicKernel} from "../utils/Kernel";
+import {stat} from "fs";
 
 interface Props {
     width?: number,
@@ -26,6 +27,8 @@ interface State {
     lengthScale: number,
     maxX: number,
     maxY: number,
+    drawMode: boolean,
+    clickHeld: boolean,
 }
 
 class SoundGraph extends React.Component<Props, State> {
@@ -41,10 +44,12 @@ class SoundGraph extends React.Component<Props, State> {
         lengthScale: 1,
         maxX: 5,
         maxY: 10,
+        drawMode: false,
+        clickHeld: false,
     }
 
     handleGraphClick = (e:any) => {
-        if (e) {
+        if (!this.state.drawMode) {
             const xCoord = e.chartX;
             const yCoord = e.chartY;
             const x = this.calcXFromXCoord(xCoord);
@@ -52,8 +57,20 @@ class SoundGraph extends React.Component<Props, State> {
             this.state.userPoints.push({x, y});
             this.onPlot();
             this.setState({})
+        } else {
+            this.setState({clickHeld: !this.state.clickHeld})
         }
     };
+
+    handleMouseMove = (e:any) => {
+        if (this.state.clickHeld) {
+            const xCoord = e.chartX;
+            const yCoord = e.chartY;
+            const x = this.calcXFromXCoord(xCoord);
+            const y = this.calcYFromYCoord(yCoord);
+            this.state.userPoints.push({x, y});
+        }
+    }
 
     handleXAxisSet = (e:any) => {
         this.setState({maxX: parseInt(e.target.value)});
@@ -99,27 +116,34 @@ class SoundGraph extends React.Component<Props, State> {
     }
 
     generateKernelDropdownAndParameters = () => {
-        return <tr>
-            <td className="params">
-                <label className="paramLabel">
-                    <Dropdown keyVals={new Map(kernels.map(kernel => [kernel.label, kernel.name]))} onChange={(e) => {
-                        this.resetPoints()
-                        this.state.params.clear()
-                        this.setState({kernel: kernels.find(kernel => kernel.name == e.target.value)!})
-                    }}/>
-                </label>
-                {this.state.kernel.parameters.map(param => {
-                    if (!this.state.params.has(param.name)) {
-                        this.state.params.set(param.name, param.default)
-                    }
-                    return <Slider key={param.name} name={param.label} min={param.min} max={param.max} value={this.state.params.get(param.name)!} onChange={(e) => {
-                        this.state.params.set(param.name, parseInt(e.target.value))
-                        this.setState({})
-                    }}/>
-                })}
-            </td>
-        </tr>
+        return <td className="params">
+            <label className="paramLabel">
+                <Dropdown keyVals={new Map(kernels.map(kernel => [kernel.label, kernel.name]))} onChange={(e) => {
+                    this.resetPoints()
+                    this.state.params.clear()
+                    this.setState({kernel: kernels.find(kernel => kernel.name == e.target.value)!})
+                }}/>
+            </label>
+            {this.state.kernel.parameters.map(param => {
+                if (!this.state.params.has(param.name)) {
+                    this.state.params.set(param.name, param.default)
+                }
+                return <Slider key={param.name} name={param.label} min={param.min} max={param.max} value={this.state.params.get(param.name)!} onChange={(e) => {
+                    this.state.params.set(param.name, parseInt(e.target.value))
+                    this.setState({})
+                }}/>
+            })}
+        </td>
+    }
 
+    generateDrawTypeDropdown = () => {
+        return <td className="params">
+            <label className="paramLabel">
+                <Dropdown keyVals={new Map([['Click points', 'false'],['Draw line','true']])} onChange={(e) => {
+                    this.setState({drawMode: e.target.value === 'true'})
+                }}/>
+            </label>
+        </td>
     }
 
     generateTable: () => JSX.Element = () => {
@@ -141,7 +165,10 @@ class SoundGraph extends React.Component<Props, State> {
                         <Slider name={`X Axis Range`} min={1} max={20} value={this.state.maxX} onChange={(e) => this.handleXAxisSet(e)}/>
                     </td>
                 </tr>
-                {this.generateKernelDropdownAndParameters()}
+                <tr>
+                    {this.generateKernelDropdownAndParameters()}
+                    {this.generateDrawTypeDropdown()}
+                </tr>
             </tbody>
         </table>
     }
@@ -149,7 +176,7 @@ class SoundGraph extends React.Component<Props, State> {
     render () {
             return (
                 <div className="graph-container">
-                    <ComposedChart width={this.width} height={this.height} onClick={this.handleGraphClick} >
+                    <ComposedChart width={this.width} height={this.height} onClick={this.handleGraphClick} onMouseMove={this.handleMouseMove}>
                         <Line type="monotone" dataKey="y" dot={false}  data={this.state.generatedPoints} />
                         <Scatter dataKey="y" fill="red" data={this.state.userPoints} />
                         <XAxis type="number" dataKey="x" domain={[0, this.state.maxX]} interval={0} tickCount={this.state.maxX + 1} height={this.axisLength} />
