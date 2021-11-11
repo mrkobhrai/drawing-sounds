@@ -40,7 +40,7 @@ class SoundGraph extends React.Component<Props, State> {
         params: new Map(),
         lengthScale: 1,
         maxX: 5,
-        maxY: 10,
+        maxY: 1,
     }
 
     handleGraphClick = (e:any) => {
@@ -67,7 +67,7 @@ class SoundGraph extends React.Component<Props, State> {
 
     calcXFromXCoord = (xCoord: number) => (xCoord - this.axisLength) / (this.width - this.axisLength) * this.state.maxX;
 
-    calcYFromYCoord = (yCoord: number) => this.state.maxY - (yCoord / (this.height - this.axisLength) * this.state.maxY);
+    calcYFromYCoord = (yCoord: number) => this.state.maxY - (yCoord / (this.height - this.axisLength) * this.state.maxY * 2);
 
     getUserPoints: () => number[][] = () => {
         return this.state.userPoints.map(point => [point.x, point.y])
@@ -153,7 +153,7 @@ class SoundGraph extends React.Component<Props, State> {
                         <Line type="monotone" dataKey="y" dot={false}  data={this.state.generatedPoints} />
                         <Scatter dataKey="y" fill="red" data={this.state.userPoints} />
                         <XAxis type="number" dataKey="x" domain={[0, this.state.maxX]} interval={0} tickCount={this.state.maxX + 1} height={this.axisLength} />
-                        <YAxis type="number" domain={[0, this.state.maxY]} interval={0} tickCount={this.state.maxY + 1} width={this.axisLength} />
+                        <YAxis type="number" domain={[-this.state.maxY, this.state.maxY]} interval={0} ticks={[-1,0,1]} width={this.axisLength} />
                         <Tooltip />
                     </ComposedChart>
                     {this.generateTable()}

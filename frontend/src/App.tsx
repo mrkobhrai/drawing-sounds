@@ -9,7 +9,7 @@ function App() {
   const graphRef = useRef<SoundGraph>(null);
   const [soundGenerator] = useState<SoundGenerator>(new SoundGenerator());
   const [pointFetcher] = useState<PointFetcher>(new PointFetcher());
-  const [inputGraph] = useState(<SoundGraph ref={graphRef}  soundGenFunc={soundGenerator.generateSound} resetSoundFunc={soundGenerator.resetSound} getDataFunc={pointFetcher.fetchData} playSoundFunc={soundGenerator.playFromStart} />)
+  const [inputGraph] = useState(<SoundGraph ref={graphRef}  soundGenFunc={soundGenerator.generateSound} resetSoundFunc={soundGenerator.resetSound} getDataFunc={pointFetcher.fetchData} playSoundFunc={soundGenerator.play} />)
 
   return  (
     <div>

@@ -1,40 +1,36 @@
-import * as Tone from 'tone';
-import {Oscillator, PitchShift} from "tone";
-
 class SoundGenerator {
-    oscillator: Oscillator;
-    pitchShifter: PitchShift;
+    audioSource: AudioBufferSourceNode | undefined;
+    started: boolean
 
-    constructor() {
-        const pitchShifter = new Tone.PitchShift().toDestination();
-        this.oscillator = new Tone.Oscillator().connect(pitchShifter);
-        this.pitchShifter = pitchShifter;
+    constructor () {
+        this.started = false;
     }
 
-    playFromStart = () => {
-        Tone.start();
-        Tone.Transport.seconds = 0;
-        Tone.Transport.start();
-        this.oscillator.start();
+    play = () => {
+        // TODO: can't click start twice
+        this.audioSource?.start();
+        this.started = true;
     }
 
     resetSound = () => {
-        Tone.Transport.cancel(0);
+        this.audioSource?.disconnect();
+        this.audioSource = undefined;
     }
 
     generateSound = (points: {x: number, y: number}[]) => {
+        const sampleRate = 44100;
+        const audioContext = new AudioContext({sampleRate});
+        const sineWaveArray  = new Float32Array(points.map((point) => point.y));
+        const audioBuffer = audioContext.createBuffer(1, sineWaveArray.length, sampleRate);
+        audioBuffer.copyToChannel(sineWaveArray, 0);
         this.resetSound();
-        const oscillator = this.oscillator;
-        for(let i = 0; i < points.length; i++) {
-            const point = points[i];
-            const x = point.x;
-            const y = point.y;
-            Tone.Transport.schedule((time) => {
-                oscillator.volume.value = y + 10;
-                if(i >= points.length - 1) {
-                    this.oscillator.stop(time + 0.3);
-                }
-            }, x);
+        const source = audioContext.createBufferSource();
+        source.loop = true;
+        source.connect(audioContext.destination);
+        source.buffer = audioBuffer;
+        this.audioSource = source;
+        if(this.started) {
+            this.play();
         }
     }
 }

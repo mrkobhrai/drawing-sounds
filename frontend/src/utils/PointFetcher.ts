@@ -19,7 +19,6 @@ class PointFetcher {
             kernel: body.kernel,
             ...Object.fromEntries(body.params)
         };
-        console.log(postBody)
         const data = await axios.post('http://localhost:5000/', postBody, {cancelToken: this.cancelToken})
             .then(result => (result.data as any).samples)
         return data
