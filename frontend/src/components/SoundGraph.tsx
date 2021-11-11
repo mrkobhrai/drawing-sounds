@@ -16,6 +16,7 @@ interface Props {
                         }[]) => void
     resetSoundFunc: () => void
     playSoundFunc: () => void
+    pauseSoundFunc: () => void
 }
 
 interface State {
@@ -40,7 +41,7 @@ class SoundGraph extends React.Component<Props, State> {
         params: new Map(),
         lengthScale: 1,
         maxX: 5,
-        maxY: 1,
+        maxY: 10,
     }
 
     handleGraphClick = (e:any) => {
@@ -133,11 +134,14 @@ class SoundGraph extends React.Component<Props, State> {
                         <Button label="Reset Graph" onChange={this.resetPoints}/>
                     </td>
                     <td className="params">
-                        <Button label="PLAY" onChange={this.props.playSoundFunc}/>
+                        <Button label="Play" onChange={this.props.playSoundFunc}/>
+                    </td>
+                    <td className="params">
+                        <Button label="Pause" onChange={this.props.pauseSoundFunc}/>
                     </td>
                 </tr>
                 <tr>
-                    <td className="params" colSpan={3}>
+                    <td className="params" colSpan={4}>
                         <Slider name={`X Axis Range`} min={1} max={20} value={this.state.maxX} onChange={(e) => this.handleXAxisSet(e)}/>
                     </td>
                 </tr>
@@ -153,7 +157,7 @@ class SoundGraph extends React.Component<Props, State> {
                         <Line type="monotone" dataKey="y" dot={false}  data={this.state.generatedPoints} />
                         <Scatter dataKey="y" fill="red" data={this.state.userPoints} />
                         <XAxis type="number" dataKey="x" domain={[0, this.state.maxX]} interval={0} tickCount={this.state.maxX + 1} height={this.axisLength} allowDataOverflow={true} />
-                        <YAxis type="number" domain={[-this.state.maxY, this.state.maxY]} interval={0} ticks={[-1,0,1]} width={this.axisLength}  allowDataOverflow={true} />
+                        <YAxis type="number" domain={[-this.state.maxY, this.state.maxY]} interval={0} ticks={[-this.state.maxY,0,this.state.maxY]} width={this.axisLength}  allowDataOverflow={true} />
                         <Tooltip />
                     </ComposedChart>
                     {this.generateTable()}

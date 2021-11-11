@@ -7,9 +7,18 @@ class SoundGenerator {
     }
 
     play = () => {
-        // TODO: can't click start twice
-        this.audioSource?.start();
-        this.started = true;
+        if (typeof this.audioSource !== 'undefined') {
+            // TODO should not call start if already running
+            this.audioSource?.start();
+            this.started = true;
+        }
+    }
+
+    pause = () => {
+        if (this.started) {
+            this.audioSource?.stop();
+            this.started = false;
+        }
     }
 
     resetSound = () => {
@@ -20,9 +29,9 @@ class SoundGenerator {
     generateSound = (points: {x: number, y: number}[]) => {
         const sampleRate = 44100;
         const audioContext = new AudioContext({sampleRate});
-        const sineWaveArray  = new Float32Array(points.map((point) => point.y));
-        const audioBuffer = audioContext.createBuffer(1, sineWaveArray.length, sampleRate);
-        audioBuffer.copyToChannel(sineWaveArray, 0);
+        const waveArray  = new Float32Array(points.map((point) => point.y));
+        const audioBuffer = audioContext.createBuffer(1, waveArray.length, sampleRate);
+        audioBuffer.copyToChannel(waveArray, 0);
         this.resetSound();
         const source = audioContext.createBufferSource();
         source.loop = true;
