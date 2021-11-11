@@ -81,7 +81,7 @@ class SoundGraph extends React.Component<Props, State> {
         // Calculate the distribution for the number of data points and X axis
         const xDistribution = this.state.maxX / generatedData.length;
         // Filter returned values to be positive
-        const structuredGeneratedData = generatedData.filter((y)=> y >= 0).map((y, i) => ({x: xDistribution * i, y: y}));
+        const structuredGeneratedData = generatedData.map((y, i) => ({x: xDistribution * i, y: y}));
         // Generate the sound
         this.props.soundGenFunc(structuredGeneratedData);
         // Update the generated points state
@@ -152,8 +152,8 @@ class SoundGraph extends React.Component<Props, State> {
                     <ComposedChart width={this.width} height={this.height} onClick={this.handleGraphClick} >
                         <Line type="monotone" dataKey="y" dot={false}  data={this.state.generatedPoints} />
                         <Scatter dataKey="y" fill="red" data={this.state.userPoints} />
-                        <XAxis type="number" dataKey="x" domain={[0, this.state.maxX]} interval={0} tickCount={this.state.maxX + 1} height={this.axisLength} />
-                        <YAxis type="number" domain={[-this.state.maxY, this.state.maxY]} interval={0} ticks={[-1,0,1]} width={this.axisLength} />
+                        <XAxis type="number" dataKey="x" domain={[0, this.state.maxX]} interval={0} tickCount={this.state.maxX + 1} height={this.axisLength} allowDataOverflow={true} />
+                        <YAxis type="number" domain={[-this.state.maxY, this.state.maxY]} interval={0} ticks={[-1,0,1]} width={this.axisLength}  allowDataOverflow={true} />
                         <Tooltip />
                     </ComposedChart>
                     {this.generateTable()}
