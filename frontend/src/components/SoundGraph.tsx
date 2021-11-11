@@ -5,18 +5,12 @@ import Slider from "./Slider";
 import Dropdown from "./Dropdown";
 import Button from "./Button";
 import {Kernel, kernels, periodicKernel} from "../utils/Kernel";
+import SoundGenerator from "../utils/SoundGenerator";
 
 interface Props {
     width?: number,
     height?: number,
     getDataFunc: (body: FetchDataBody) => Promise<number[][]>
-    soundGenFunc: (points: {
-                            x: number;
-                            y: number;
-                        }[]) => void
-    resetSoundFunc: () => void
-    playSoundFunc: () => void
-    pauseSoundFunc: () => void
 }
 
 interface State {
@@ -27,6 +21,7 @@ interface State {
     lengthScale: number,
     maxX: number,
     maxY: number,
+    soundGenerator: SoundGenerator;
 }
 
 class SoundGraph extends React.Component<Props, State> {
@@ -42,7 +37,11 @@ class SoundGraph extends React.Component<Props, State> {
         lengthScale: 1,
         maxX: 5,
         maxY: 10,
+        soundGenerator: new SoundGenerator(),
     }
+
+
+    soundGenerator = () => this.state.soundGenerator;
 
     handleGraphClick = (e:any) => {
         if (e) {
@@ -84,7 +83,7 @@ class SoundGraph extends React.Component<Props, State> {
         // Filter returned values to be positive
         const structuredGeneratedData = generatedData.map((y, i) => ({x: xDistribution * i, y: y}));
         // Generate the sound
-        this.props.soundGenFunc(structuredGeneratedData);
+        this.soundGenerator().generateSound(structuredGeneratedData);
         // Update the generated points state
         this.state.generatedPoints = structuredGeneratedData;
         // Force a component rerender by updating the state
@@ -95,7 +94,7 @@ class SoundGraph extends React.Component<Props, State> {
         this.state.userPoints.splice(0, this.state.userPoints.length)
         this.state.generatedPoints.splice(0, this.state.generatedPoints.length)
         this.state.params.clear()
-        this.props.resetSoundFunc();
+        this.soundGenerator().resetSound();
         this.setState({})
     }
 
@@ -134,10 +133,10 @@ class SoundGraph extends React.Component<Props, State> {
                         <Button label="Reset Graph" onChange={this.resetPoints}/>
                     </td>
                     <td className="params">
-                        <Button label="Play" onChange={this.props.playSoundFunc}/>
+                        <Button label="Play" onChange={this.soundGenerator().play}/>
                     </td>
                     <td className="params">
-                        <Button label="Pause" onChange={this.props.pauseSoundFunc}/>
+                        <Button label="Pause" onChange={this.soundGenerator().pause}/>
                     </td>
                 </tr>
                 <tr>
