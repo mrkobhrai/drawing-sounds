@@ -1,6 +1,5 @@
 import axios from 'axios';
-import {periodParam} from "./KernelParameter";
-import {stringify} from "querystring";
+import { send } from 'process';
 
 export interface FetchDataBody {
     points: number[][],
@@ -11,6 +10,21 @@ export interface FetchDataBody {
 class PointFetcher {
     source = axios.CancelToken.source();
     cancelToken = this.source.token;
+    ws = new WebSocket('ws://localhost:5000/gaussian')
+
+    constructor() {
+        this.connectSocket();
+    }
+
+    connectSocket = () => { 
+        this.ws.onopen = () => console.log("Connected socket");
+        this.ws.onclose = () => console.log("Closing websocket");
+        this.ws.onmessage = evt => console.log(evt.data)
+    }
+
+    sendDataMsg = (body: any) => {
+        this.ws.send(JSON.stringify(body))
+    }
 
     fetchData: (body: FetchDataBody) => Promise<number[][]>
         = async (body: FetchDataBody) => {
@@ -19,8 +33,13 @@ class PointFetcher {
             kernel: body.kernel,
             ...Object.fromEntries(body.params)
         };
+
+        if(body.points.length > 2){
+            this.sendDataMsg(postBody);
+        }
+
         const data = await axios.post('http://localhost:5000/', postBody, {cancelToken: this.cancelToken})
-            .then(result => (result.data as any).samples)
+            .then(result => (result.data as any).samples).catch()
         return data
     }
 }
