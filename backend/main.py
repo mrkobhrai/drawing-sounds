@@ -11,17 +11,6 @@ cors = CORS(app, resources={r"/": {"origins": "http://localhost:3000"}})
 # TODO: Change the constant args to a modifiable parameter.
 gaussian_process = GaussianProcess(x_range=(0, 5), n_datapoints=1000)
 
-
-@sock.route('/gaussian')
-def socket_handler(ws):
-   while True:
-      raw_data = ws.receive()
-      request_body = json.loads(raw_data)
-      data = handleRequest(request_body)
-      data_json = json.dumps(data)
-      ws.send(data_json)
-
-
 def handleRequest(request_body):
       points = request_body['points']
       points = [(point[0], point[1]) for point in points]
@@ -38,7 +27,15 @@ def handleRequest(request_body):
       gaussian_process.update_data(xs, ys)
       points_gp = gaussian_process.sample_from_posterior()
       return points_gp.tolist()
-         
+
+@sock.route('/gaussian')
+def socket_handler(ws):
+   while True:
+      raw_data = ws.receive()
+      request_body = json.loads(raw_data)
+      data = handleRequest(request_body)
+      data_json = json.dumps(data)
+      ws.send(data_json)    
 
 @app.route('/', methods=['POST'])
 def generate_handler():
