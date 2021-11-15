@@ -48,27 +48,34 @@ class SoundGraph extends React.Component<Props, State> {
         clickHeld: false,
     }
 
-    handleGraphClick = (e:any) => {
-        if (!this.state.drawMode) {
+    addPoint = (e: any) => {
+        if (e) {
             const xCoord = e.chartX;
             const yCoord = e.chartY;
             const x = this.calcXFromXCoord(xCoord);
             const y = this.calcYFromYCoord(yCoord);
             this.state.userPoints.push({x, y});
-            this.onPlot();
-            this.setState({})
-        } else {
-            this.setState({clickHeld: !this.state.clickHeld})
+        }
+    }
+
+    handleGraphClick = (e:any) => {
+        if (e) {
+            if (!this.state.drawMode) {
+                this.addPoint(e)
+                this.onPlot();
+                this.setState({})
+            } else {
+                this.onPlot();
+                this.setState({clickHeld: !this.state.clickHeld})
+            }
         }
     };
 
     handleMouseMove = (e:any) => {
-        if (this.state.clickHeld) {
-            const xCoord = e.chartX;
-            const yCoord = e.chartY;
-            const x = this.calcXFromXCoord(xCoord);
-            const y = this.calcYFromYCoord(yCoord);
-            this.state.userPoints.push({x, y});
+        if (e) {
+            if (this.state.clickHeld) {
+                this.addPoint(e)
+            }
         }
     }
 
@@ -119,7 +126,6 @@ class SoundGraph extends React.Component<Props, State> {
         return <td className="params">
             <label className="paramLabel">
                 <Dropdown keyVals={new Map(kernels.map(kernel => [kernel.label, kernel.name]))} onChange={(e) => {
-                    this.resetPoints()
                     this.state.params.clear()
                     this.setState({kernel: kernels.find(kernel => kernel.name == e.target.value)!})
                 }}/>
