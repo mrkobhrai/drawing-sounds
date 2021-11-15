@@ -13,10 +13,16 @@ gaussian_process = GaussianProcess(x_range=(0, 5), n_datapoints=1000)
 
 
 @sock.route('/gaussian')
-def reverse(ws):
+def socket_handler(ws):
    while True:
       raw_data = ws.receive()
       request_body = json.loads(raw_data)
+      data = handleRequest(request_body)
+      data_json = json.dumps(data)
+      ws.send(data_json)
+
+
+def handleRequest(request_body):
       points = request_body['points']
       points = [(point[0], point[1]) for point in points]
       xs, ys = map(list, zip(*points))
@@ -31,36 +37,16 @@ def reverse(ws):
       # # Perform Gaussian process
       gaussian_process.update_data(xs, ys)
       points_gp = gaussian_process.sample_from_posterior()
-      data = json.dumps(points_gp.tolist())
-      ws.send(data)
-
-
-      
+      return points_gp.tolist()
+         
 
 @app.route('/', methods=['POST'])
 def generate_handler():
     request_body = request.get_json()
-    
-    # Process input points
-    points = request_body['points']
-    points = [(point[0], point[1]) for point in points]
-    xs, ys = map(list, zip(*points))
-
-    # Set kernel and its parameters
-    kernel_name = request_body.get('kernel')
-    if kernel_name is None:
-        kernel_name = 'periodic_kernel'
-    params = request_body
-    kernel = parse_kernel(kernel_name, params)
-    gaussian_process.kernel = kernel
-
-    # Perform Gaussian process
-    gaussian_process.update_data(xs, ys)
-    points_gp = gaussian_process.sample_from_posterior()
-
+    data = handleRequest(request_body)
     # Process input
     response = {}
-    response["samples"] = [points_gp.tolist()]
+    response["samples"] = [data]
     return response
 
 
