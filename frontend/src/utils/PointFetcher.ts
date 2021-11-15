@@ -1,5 +1,4 @@
-import axios from 'axios';
-import { send } from 'process';
+import SoundGraph from '../components/SoundGraph';
 
 export interface FetchDataBody {
     points: number[][],
@@ -7,26 +6,30 @@ export interface FetchDataBody {
     params: Map<string, number>
 }
 
-class PointFetcher {
-    source = axios.CancelToken.source();
-    cancelToken = this.source.token;
-    ws = new WebSocket('ws://localhost:5000/gaussian')
+const BACKEND_WS_URL = 'ws://localhost:5000/gaussian'
 
-    constructor() {
+class PointFetcher {
+    
+    ws = new WebSocket(BACKEND_WS_URL)
+    graphRef: React.RefObject<SoundGraph>;
+
+    constructor(graphRef: React.RefObject<SoundGraph>) {
         this.connectSocket();
+        this.graphRef = graphRef;
     }
 
     connectSocket = () => { 
         this.ws.onopen = () => console.log("Connected socket");
         this.ws.onclose = () => console.log("Closing websocket");
-        this.ws.onmessage = evt => console.log(evt.data)
+        this.ws.onmessage = (evt) => this.graphRef.current?.onData(evt.data)
+        this.ws.onerror = () => {
+            console.log("Socket failed, reestablishing connection")
+            this.ws = new WebSocket(BACKEND_WS_URL)
+            this.connectSocket()
+        } 
     }
 
-    sendDataMsg = (body: any) => {
-        this.ws.send(JSON.stringify(body))
-    }
-
-    fetchData: (body: FetchDataBody) => Promise<number[][]>
+    sendData: (body: FetchDataBody) => void
         = async (body: FetchDataBody) => {
         const postBody = {
             points: body.points,
@@ -35,12 +38,8 @@ class PointFetcher {
         };
 
         if(body.points.length > 2){
-            this.sendDataMsg(postBody);
+            this.ws.send(JSON.stringify(postBody))
         }
-
-        const data = await axios.post('http://localhost:5000/', postBody, {cancelToken: this.cancelToken})
-            .then(result => (result.data as any).samples).catch()
-        return data
     }
 }
 

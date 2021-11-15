@@ -1,12 +1,13 @@
-import React, {useState} from 'react';
+import React, {createRef, useState} from 'react';
 import './App.css';
 import './SASSStyles.scss';
 import PointFetcher from './utils/PointFetcher';
 import SoundGraph from './components/SoundGraph';
 
 function App() {
-  const [pointFetcher] = useState<PointFetcher>(new PointFetcher());
-  const [inputGraph] = useState(<SoundGraph getDataFunc={pointFetcher.fetchData} />)
+  const graphRef = createRef<SoundGraph>();
+  const [pointFetcher] = useState<PointFetcher>(new PointFetcher(graphRef));
+  const [inputGraph] = useState(<SoundGraph ref={graphRef} sendDataFunc={pointFetcher.sendData} />)
 
   return  (
     <div>
