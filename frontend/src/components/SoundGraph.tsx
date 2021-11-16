@@ -10,7 +10,7 @@ import SoundGenerator from "../utils/SoundGenerator";
 interface Props {
     width?: number,
     height?: number,
-    getDataFunc: (body: FetchDataBody) => Promise<number[][]>
+    sendDataFunc: (body: FetchDataBody) => void
 }
 
 interface State {
@@ -77,7 +77,15 @@ class SoundGraph extends React.Component<Props, State> {
         // Get the user points
         const userData = this.getUserPoints();
         // Get the gaussian data
-        const generatedData = (await this.props.getDataFunc({points: userData, kernel: this.state.kernel.name, params: this.state.params}))[0];
+        await this.props.sendDataFunc({points: userData, kernel: this.state.kernel.name, params: this.state.params});
+    }
+
+    onData = (data: any) => {
+        const generatedData: number[] =  JSON.parse(data)
+        this.updateGeneratedPoints(generatedData)
+    }
+
+    updateGeneratedPoints = (generatedData: number[]) => {
         // Calculate the distribution for the number of data points and X axis
         const xDistribution = this.state.maxX / generatedData.length;
         // Filter returned values to be positive
