@@ -6,6 +6,7 @@ import Dropdown from "./Dropdown";
 import Button from "./Button";
 import {Kernel, kernels, periodicKernel} from "../utils/Kernel";
 import SoundGenerator from "../utils/SoundGenerator";
+import DrawingCanvas from "./DrawingCanvas";
 
 interface Props {
     width?: number,
@@ -167,6 +168,7 @@ class SoundGraph extends React.Component<Props, State> {
                         <YAxis type="number" domain={[-this.state.maxY, this.state.maxY]} interval={0} ticks={[-this.state.maxY,0,this.state.maxY]} width={this.axisLength}  allowDataOverflow={true} />
                         <Tooltip />
                     </ComposedChart>
+                    <DrawingCanvas onMouseUpCallback={() => {}}></DrawingCanvas>
                     {this.generateTable()}
                 </div>
             )
