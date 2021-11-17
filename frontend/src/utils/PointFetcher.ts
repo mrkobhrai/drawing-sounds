@@ -1,12 +1,6 @@
 import SoundGraph from '../components/SoundGraph';
 import React from "react";
-
-export interface FetchDataBody {
-    points: number[][],
-    kernel: string,
-    params: Map<string, number>,
-    optimiseParams?: boolean,
-}
+import {FetchDataBody} from "../Interfaces";
 
 const BACKEND_WS_URL = 'ws://localhost:5000/gaussian'
 

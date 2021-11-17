@@ -1,11 +1,12 @@
 import React from "react";
 import { Line, XAxis, YAxis, Tooltip, ComposedChart, Scatter } from 'recharts';
-import PointFetcher, {FetchDataBody} from "../utils/PointFetcher";
+import PointFetcher from "../utils/PointFetcher";
 import Slider from "./Slider";
 import Dropdown from "./Dropdown";
 import Button from "./Button";
 import {Kernel, kernels, periodicKernel} from "../utils/Kernel";
 import SoundGenerator from "../utils/SoundGenerator";
+import {FetchDataBody, FetchRequestBody} from "../Interfaces";
 
 interface Props {
     width?: number,
@@ -81,8 +82,15 @@ class SoundGraph extends React.Component<Props, State> {
     }
 
     onData = (data: any) => {
-        const generatedData: number[] =  JSON.parse(data)
-        this.updateGeneratedPoints(generatedData)
+        let generatedData: number[] | FetchRequestBody = JSON.parse(data)
+        if (Array.isArray(generatedData)) {
+            this.updateGeneratedPoints(generatedData as number[])
+        } else {
+            this.updateGeneratedPoints(generatedData.data);
+            generatedData.params.forEach((keyValue) => {
+                this.state.params.set(keyValue.name, keyValue.value)
+            })
+        }
     }
 
     optimiseParams = async () => {
