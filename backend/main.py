@@ -8,10 +8,9 @@ import json
 app = Flask(__name__)
 sock = Sock(app)
 cors = CORS(app, resources={r"/": {"origins": "http://localhost:3000"}})
-# TODO: Change the constant args to a modifiable parameter.
-gaussian_process = GaussianProcess(x_range=(0, 5), n_datapoints=1000)
 
-def handleRequest(request_body):
+def handleRequest(request_body,  n_datapoints=1000):
+      gaussian_process = GaussianProcess(x_range=(0, 5), n_datapoints=n_datapoints)
       points = request_body['points']
       points = [(point[0], point[1]) for point in points]
       xs, ys = map(list, zip(*points))
@@ -33,9 +32,13 @@ def socket_handler(ws):
    while True:
       raw_data = ws.receive()
       request_body = json.loads(raw_data)
-      data = handleRequest(request_body)
+      data = handleRequest(request_body, 50)
       data_json = json.dumps(data)
       ws.send(data_json)    
+      data = handleRequest(request_body, 1000)
+      data_json = json.dumps(data)
+      ws.send(data_json) 
+      
 
 @app.route('/', methods=['POST'])
 def generate_handler():
