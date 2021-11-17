@@ -51,7 +51,7 @@ class SoundGraph extends React.Component<Props, State> {
             const y = this.calcYFromYCoord(yCoord);
             this.state.userPoints.push({x, y});
             this.onPlot();
-            this.setState({})
+            this.setState({});
         }
     };
 
@@ -107,26 +107,28 @@ class SoundGraph extends React.Component<Props, State> {
     }
 
     generateKernelDropdownAndParameters = () => {
-        return <tr>
-            <td className="params">
-                <label className="paramLabel">
-                    <Dropdown keyVals={new Map(kernels.map(kernel => [kernel.label, kernel.name]))} onChange={(e) => {
-                        this.resetPoints()
-                        this.state.params.clear()
-                        this.setState({kernel: kernels.find(kernel => kernel.name == e.target.value)!})
-                    }}/>
-                </label>
-                {this.state.kernel.parameters.map(param => {
-                    if (!this.state.params.has(param.name)) {
-                        this.state.params.set(param.name, param.default)
-                    }
-                    return <Slider key={param.name} name={param.label} min={param.min} max={param.max} value={this.state.params.get(param.name)!} onChange={(e) => {
-                        this.state.params.set(param.name, parseInt(e.target.value))
-                        this.setState({})
-                    }}/>
-                })}
-            </td>
-        </tr>
+        return (
+            <tr>
+                <td className="params">
+                    <label className="paramLabel">
+                        <Dropdown keyVals={new Map(kernels.map(kernel => [kernel.label, kernel.name]))} onChange={(e) => {
+                            this.resetPoints()
+                            this.state.params.clear()
+                            this.setState({kernel: kernels.find(kernel => kernel.name === e.target.value)!})
+                        }}/>
+                    </label>
+                    {this.state.kernel.parameters.map(param => {
+                        if (!this.state.params.has(param.name)) {
+                            this.state.params.set(param.name, param.default)
+                        }
+                        return <Slider key={param.name} name={param.label} min={param.min} max={param.max} value={this.state.params.get(param.name)!} onChange={(e) => {
+                            this.state.params.set(param.name, parseInt(e.target.value))
+                            this.setState({})
+                        }}/>
+                    })}
+                </td>
+            </tr>
+        );
 
     }
 
@@ -159,14 +161,16 @@ class SoundGraph extends React.Component<Props, State> {
 
     render () {
             return (
-                <div className="graph-container">
-                    <ComposedChart width={this.width} height={this.height} onClick={this.handleGraphClick} >
-                        <Line type="monotone" dataKey="y" dot={false}  data={this.state.generatedPoints} />
-                        <Scatter dataKey="y" fill="red" data={this.state.userPoints} />
-                        <XAxis type="number" dataKey="x" domain={[0, this.state.maxX]} interval={0} tickCount={this.state.maxX + 1} height={this.axisLength} allowDataOverflow={true} />
-                        <YAxis type="number" domain={[-this.state.maxY, this.state.maxY]} interval={0} ticks={[-this.state.maxY,0,this.state.maxY]} width={this.axisLength}  allowDataOverflow={true} />
-                        <Tooltip />
-                    </ComposedChart>
+                <div className="graphContainer">
+                    <div style={{margin: "0 0 0 17.5vw"}}>
+                        <ComposedChart width={this.width} height={this.height} onClick={this.handleGraphClick} >
+                            <Line type="monotone" dataKey="y" dot={false}  data={this.state.generatedPoints} />
+                            <Scatter dataKey="y" fill="red" data={this.state.userPoints} />
+                            <XAxis type="number" dataKey="x" domain={[0, this.state.maxX]} interval={0} tickCount={this.state.maxX + 1} height={this.axisLength} allowDataOverflow={true} />
+                            <YAxis type="number" domain={[-this.state.maxY, this.state.maxY]} interval={0} ticks={[-this.state.maxY,0,this.state.maxY]} width={this.axisLength}  allowDataOverflow={true} />
+                            <Tooltip />
+                        </ComposedChart>
+                    </div>
                     {this.generateTable()}
                 </div>
             )
