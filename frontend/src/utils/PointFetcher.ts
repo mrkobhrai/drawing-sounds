@@ -1,9 +1,11 @@
 import SoundGraph from '../components/SoundGraph';
+import React from "react";
 
 export interface FetchDataBody {
     points: number[][],
     kernel: string,
-    params: Map<string, number>
+    params: Map<string, number>,
+    optimiseParams?: boolean,
 }
 
 const BACKEND_WS_URL = 'ws://localhost:5000/gaussian'
@@ -22,8 +24,9 @@ class PointFetcher {
         this.ws.onopen = () => console.log("Connected socket");
         this.ws.onclose = () => console.log("Closing websocket");
         this.ws.onmessage = (evt) => this.graphRef.current?.onData(evt.data)
-        this.ws.onerror = () => {
+        this.ws.onerror = (e) => {
             console.log("Socket failed, reestablishing connection")
+            console.log(e)
             this.ws = new WebSocket(BACKEND_WS_URL)
             this.connectSocket()
         } 
@@ -34,11 +37,14 @@ class PointFetcher {
         const postBody = {
             points: body.points,
             kernel: body.kernel,
-            ...Object.fromEntries(body.params)
+            ...Object.fromEntries(body.params),
+            optimiseParams: body.optimiseParams ?? false,
         };
 
         if(body.points.length > 2){
-            this.ws.send(JSON.stringify(postBody))
+            if (this.ws.readyState) {
+                this.ws.send(JSON.stringify(postBody))
+            }
         }
     }
 }

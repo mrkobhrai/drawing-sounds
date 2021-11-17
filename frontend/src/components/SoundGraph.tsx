@@ -1,6 +1,6 @@
 import React from "react";
 import { Line, XAxis, YAxis, Tooltip, ComposedChart, Scatter } from 'recharts';
-import {FetchDataBody} from "../utils/PointFetcher";
+import PointFetcher, {FetchDataBody} from "../utils/PointFetcher";
 import Slider from "./Slider";
 import Dropdown from "./Dropdown";
 import Button from "./Button";
@@ -10,7 +10,7 @@ import SoundGenerator from "../utils/SoundGenerator";
 interface Props {
     width?: number,
     height?: number,
-    sendDataFunc: (body: FetchDataBody) => void
+    pointFetcher: PointFetcher,
 }
 
 interface State {
@@ -77,12 +77,22 @@ class SoundGraph extends React.Component<Props, State> {
         // Get the user points
         const userData = this.getUserPoints();
         // Get the gaussian data
-        await this.props.sendDataFunc({points: userData, kernel: this.state.kernel.name, params: this.state.params});
+        await this.props.pointFetcher.sendData({points: userData, kernel: this.state.kernel.name, params: this.state.params});
     }
 
     onData = (data: any) => {
         const generatedData: number[] =  JSON.parse(data)
         this.updateGeneratedPoints(generatedData)
+    }
+
+    optimiseParams = async () => {
+        const userData = this.getUserPoints();
+        await this.props.pointFetcher.sendData({
+            points: userData,
+            kernel: this.state.kernel.name,
+            params: this.state.params,
+            optimiseParams: true,
+        })
     }
 
     updateGeneratedPoints = (generatedData: number[]) => {
@@ -125,6 +135,7 @@ class SoundGraph extends React.Component<Props, State> {
                         this.setState({})
                     }}/>
                 })}
+                <Button label="Optimise Parameters" onChange={() => {console.log('clicked')}}/>
             </td>
         </tr>
 

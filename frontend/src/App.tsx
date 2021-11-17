@@ -7,7 +7,7 @@ import SoundGraph from './components/SoundGraph';
 function App() {
   const graphRef = createRef<SoundGraph>();
   const [pointFetcher] = useState<PointFetcher>(new PointFetcher(graphRef));
-  const [inputGraph] = useState(<SoundGraph ref={graphRef} sendDataFunc={pointFetcher.sendData} />)
+  const [inputGraph] = useState(<SoundGraph ref={graphRef} pointFetcher={pointFetcher} />)
 
   return  (
     <div>
