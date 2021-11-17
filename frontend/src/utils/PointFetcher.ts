@@ -8,22 +8,29 @@ export interface FetchDataBody {
 
 const BACKEND_WS_URL = 'ws://localhost:5000/gaussian'
 
+const SOCKET_CONNECTION = {
+    CONNECTING: 'Connecting',
+    CONNECTED: 'Connected :)',
+    LOST_CONNECTION: 'Lost connection, trying to reconnect...',
+}
+
 class PointFetcher {
-    
     ws = new WebSocket(BACKEND_WS_URL)
     graphRef: React.RefObject<SoundGraph>;
+    setSocketLoading: React.Dispatch<React.SetStateAction<string>>;
 
-    constructor(graphRef: React.RefObject<SoundGraph>) {
+    constructor(graphRef: React.RefObject<SoundGraph>, setSocketLoading: React.Dispatch<React.SetStateAction<string>>) {
         this.connectSocket();
         this.graphRef = graphRef;
+        this.setSocketLoading = setSocketLoading;
     }
 
     connectSocket = () => { 
-        this.ws.onopen = () => console.log("Connected socket");
-        this.ws.onclose = () => console.log("Closing websocket");
+        this.ws.onopen = () => this.setSocketLoading(SOCKET_CONNECTION.CONNECTED);
+        this.ws.onclose = () => this.setSocketLoading(SOCKET_CONNECTION.LOST_CONNECTION);
         this.ws.onmessage = (evt) => this.graphRef.current?.onData(evt.data)
         this.ws.onerror = () => {
-            console.log("Socket failed, reestablishing connection")
+            this.setSocketLoading(SOCKET_CONNECTION.LOST_CONNECTION);
             this.ws = new WebSocket(BACKEND_WS_URL)
             this.connectSocket()
         } 
@@ -43,4 +50,4 @@ class PointFetcher {
     }
 }
 
-export default PointFetcher;
+export {PointFetcher, SOCKET_CONNECTION};
