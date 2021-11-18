@@ -11,30 +11,32 @@ sock = Sock(app)
 cors = CORS(app, resources={r"/": {"origins": "http://localhost:3000"}})
 
 
+sound_generator = GPSoundGenerator(sample_rate=1000)
+
+
 def handleRequest(request_body,  n_datapoints=1000):
-    sound_generator = GPSoundGenerator(sample_rate=10000)
     points = request_body['points']
     points = [(point[0], point[1]) for point in points]
     xs, ys = map(list, zip(*points))
 
     # Set kernel and its parameters
-    kernel_name = request_body.get('kernel')
+    kernel_name = request_body['kernel']
     if kernel_name is None:
         kernel_name = 'exponentiated_quadratic_kernel'
     params = request_body
-    
     sound_generator.update_train_data(xs, ys, params, kernel_name)
 
     if request_body['optimiseParams']:
        trained_params = sound_generator.fit()    
+    else:
+       trained_params = None
     
-    points_gp = sound_generator.sample_from_posterior()
+    points_gp = sound_generator.sample_from_posterior((0, 5))
+    print(points_gp)
+    print(trained_params)
 
-    # Process input
-    response = {}
-    response["samples"] = [points_gp.tolist()]
-    response["params"] = trained_params
     return points_gp.tolist(), trained_params
+
 
 @sock.route('/gaussian')
 def socket_handler(ws):
@@ -55,14 +57,14 @@ def generate_handler():
     data, updated_params = handleRequest(request_body)
     # Process input
     response = {}
-    response["samples"] = [data]
+    response["data"] =[data]
     response["params"] = updated_params
 
     return response
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=3000)
+    app.run()
 
 """
 REQ format: array of (array of [x, y] points)

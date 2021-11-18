@@ -25,16 +25,16 @@ class GaussianProcess(gpytorch.models.ExactGP):
             lengthscale = params.get('lengthscale')
             amplitude = params.get('amplitude')
             period = params.get('period')
-            covar_module.lengthscale = lengthscale
+            covar_module.base_kernel.lengthscale = lengthscale
+            covar_module.base_kernel.period_length = period
             covar_module.outputscale = amplitude
-            covar_module.period_length = period
 
         elif kernel_name == 'exponentiated_quadratic_kernel':
             covar_module = gpytorch.kernels.ScaleKernel(
                 gpytorch.kernels.RBFKernel())
             lengthscale = params.get('lengthscale')
             amplitude = params.get('amplitude')
-            covar_module.lengthscale = lengthscale
+            covar_module.base_kernel.lengthscale = lengthscale
             covar_module.outputscale = amplitude
         elif kernel_name == 'rational_quadratic_kernel':
             alpha = params.get('alpha')
@@ -42,7 +42,7 @@ class GaussianProcess(gpytorch.models.ExactGP):
                 gpytorch.kernels.RQKernel(alpha_constraint=alpha))
             lengthscale = params.get('lengthscale')
             amplitude = params.get('amplitude')
-            covar_module.lengthscale = lengthscale
+            covar_module.base_kernel.lengthscale = lengthscale
             covar_module.outputscale = amplitude
         else:
             return None
@@ -52,7 +52,7 @@ class GaussianProcess(gpytorch.models.ExactGP):
     def forward(self, x):
         mean_x = self.mean_module(x)
         covar_x = self.covar_module(x)
-        return gpytorch.distributions.MultitaskMultivariateNormal(
+        return gpytorch.distributions.MultivariateNormal(
             mean_x, covar_x)
 
     def retrieve_trained_params(self):
@@ -60,19 +60,19 @@ class GaussianProcess(gpytorch.models.ExactGP):
         params = {}
         
         if self.kernel_name == 'spectral_mixture_kernel':
-            params['lengthscale'] = self.covar_module.lengthscale
+            params['lengthscale'] = self.covar_module.base_kernel.lengthscale
 
         elif self.kernel_name == 'periodic_kernel':
-            params['lengthscale'] = self.covar_module.lengthscale
+            params['lengthscale'] = self.covar_module.base_kernel.lengthscale
             params['outputscale'] = self.covar_module.outputscale
-            params['period_length'] = self.covar_module.period_length 
+            params['period_length'] = self.covar_module.base_kernel.period_length 
 
         elif self.kernel_name == 'exponentiated_quadratic_kernel':
-            params['lengthscale'] = self.covar_module.lengthscale
+            params['lengthscale'] = self.covar_module.base_kernel.lengthscale
             params['outputscale'] = self.covar_module.outputscale
 
         elif self.kernel_name == 'rational_quadratic_kernel':
-            params['lengthscale'] = self.covar_module.lengthscale
+            params['lengthscale'] = self.covar_module.base_kernel.lengthscale
             params['outputscale'] = self.covar_module.outputscale
 
         else:
