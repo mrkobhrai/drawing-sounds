@@ -67,20 +67,20 @@ class GaussianProcess(gpytorch.models.ExactGP):
         elif self.kernel_name == 'periodic_kernel':
             params.append({'name': 'lengthscale',
                            'value': self.covar_module.base_kernel.lengthscale.item()})
-            params.append({'name': 'ouputscale',
+            params.append({'name': 'amplitude',
                            'value': self.covar_module.outputscale.item()})
-            params.append({'name': 'period_length',
+            params.append({'name': 'period',
                            'value': self.covar_module.base_kernel.period_length.item()})
         elif self.kernel_name == 'exponentiated_quadratic_kernel':
             params.append({'name': 'lengthscale',
                            'value': self.covar_module.base_kernel.lengthscale.item()})
-            params.append({'name': 'ouputscale',
+            params.append({'name': 'amplitude',
                            'value': self.covar_module.outputscale.item()})
 
         elif self.kernel_name == 'rational_quadratic_kernel':
             params.append({'name': 'lengthscale',
                            'value': self.covar_module.base_kernel.lengthscale.item()})
-            params.append({'name': 'ouputscale',
+            params.append({'name': 'amplitude',
                            'value': self.covar_module.outputscale.item()})
             params.append({'name': 'alpha',
                            'value': self.covar_module.base_kernel.alpha_constraint.item()})
