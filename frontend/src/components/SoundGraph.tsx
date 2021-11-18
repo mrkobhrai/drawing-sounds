@@ -52,7 +52,7 @@ class SoundGraph extends React.Component<Props, State> {
             const y = this.calcYFromYCoord(yCoord);
             this.state.userPoints.push({x, y});
             this.onPlot();
-            this.setState({})
+            this.setState({});
         }
     };
 
@@ -168,14 +168,16 @@ class SoundGraph extends React.Component<Props, State> {
 
     render () {
             return (
-                <div className="graph-container">
-                    <ComposedChart width={this.width} height={this.height} onClick={this.handleGraphClick} >
-                        <Line type="monotone" dataKey="y" dot={false}  data={this.state.generatedPoints} />
-                        <Scatter dataKey="y" fill="red" data={this.state.userPoints} />
-                        <XAxis type="number" dataKey="x" domain={[0, this.state.maxX]} interval={0} tickCount={this.state.maxX + 1} height={this.axisLength} allowDataOverflow={true} />
-                        <YAxis type="number" domain={[-this.state.maxY, this.state.maxY]} interval={0} ticks={[-this.state.maxY,0,this.state.maxY]} width={this.axisLength}  allowDataOverflow={true} />
-                        <Tooltip />
-                    </ComposedChart>
+                <div className="graphContainer">
+                    <div style={{margin: "0 0 0 17.5vw"}}>
+                        <ComposedChart width={this.width} height={this.height} onClick={this.handleGraphClick} >
+                            <Line type="monotone" dataKey="y" dot={false}  data={this.state.generatedPoints} />
+                            <Scatter dataKey="y" fill="red" data={this.state.userPoints} />
+                            <XAxis type="number" dataKey="x" domain={[0, this.state.maxX]} interval={0} tickCount={this.state.maxX + 1} height={this.axisLength} allowDataOverflow={true} />
+                            <YAxis type="number" domain={[-this.state.maxY, this.state.maxY]} interval={0} ticks={[-this.state.maxY,0,this.state.maxY]} width={this.axisLength}  allowDataOverflow={true} />
+                            <Tooltip />
+                        </ComposedChart>
+                    </div>
                     {this.generateTable()}
                 </div>
             )

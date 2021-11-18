@@ -25,12 +25,12 @@ select, button {
   color: white;
 }
 
-div.graph-container {
+div.graphContainer {
   text-align: center;
   align-items: center;
   justify-content: left;
   width: 80vw;
-  margin: 10vw;
+  margin: 2vw 10vw 10vw 10vw;
 }
 
 table.params {
@@ -92,4 +92,13 @@ svg {
   height: 25px;
   background: #04AA6D;
   cursor: pointer;
+}
+
+div.socketStatus {
+  width: 80%;
+  padding: 1% 0%;
+  margin: 0 10%;
+  text-align: center;
+  font-size: larger;
+  font-weight: bolder;
 }
