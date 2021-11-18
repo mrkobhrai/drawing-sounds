@@ -39,10 +39,11 @@ class GaussianProcess(gpytorch.models.ExactGP):
         elif kernel_name == 'rational_quadratic_kernel':
             alpha = params.get('alpha')
             covar_module = gpytorch.kernels.ScaleKernel(
-                gpytorch.kernels.RQKernel(alpha_constraint=alpha))
+                gpytorch.kernels.RQKernel())
             lengthscale = params.get('lengthscale')
             amplitude = params.get('amplitude')
             covar_module.base_kernel.lengthscale = lengthscale
+            covar_module.base_kernel.alpha_constraint = float(alpha)
             covar_module.outputscale = amplitude
         else:
             return None
@@ -57,23 +58,32 @@ class GaussianProcess(gpytorch.models.ExactGP):
 
     def retrieve_trained_params(self):
 
-        params = {}
+        params = []
         
         if self.kernel_name == 'spectral_mixture_kernel':
-            params['lengthscale'] = self.covar_module.base_kernel.lengthscale.item()
+            params.append({'name': 'lengthscale',
+                           'value': self.covar_module.base_kernel.lengthscale.item()})
 
         elif self.kernel_name == 'periodic_kernel':
-            params['lengthscale'] = self.covar_module.base_kernel.lengthscale.item()
-            params['outputscale'] = self.covar_module.outputscale.item()
-            params['period_length'] = self.covar_module.base_kernel.period_length.item()
-
+            params.append({'name': 'lengthscale',
+                           'value': self.covar_module.base_kernel.lengthscale.item()})
+            params.append({'name': 'ouputscale',
+                           'value': self.covar_module.outputscale.item()})
+            params.append({'name': 'period_length',
+                           'value': self.covar_module.base_kernel.period_length.item()})
         elif self.kernel_name == 'exponentiated_quadratic_kernel':
-            params['lengthscale'] = self.covar_module.base_kernel.lengthscale.item()
-            params['outputscale'] = self.covar_module.outputscale.item()
+            params.append({'name': 'lengthscale',
+                           'value': self.covar_module.base_kernel.lengthscale.item()})
+            params.append({'name': 'ouputscale',
+                           'value': self.covar_module.outputscale.item()})
 
         elif self.kernel_name == 'rational_quadratic_kernel':
-            params['lengthscale'] = self.covar_module.base_kernel.lengthscale.item()
-            params['outputscale'] = self.covar_module.outputscale.item()
+            params.append({'name': 'lengthscale',
+                           'value': self.covar_module.base_kernel.lengthscale.item()})
+            params.append({'name': 'ouputscale',
+                           'value': self.covar_module.outputscale.item()})
+            params.append({'name': 'alpha',
+                           'value': self.covar_module.base_kernel.alpha_constraint.item()})
 
         else:
             return None
@@ -137,7 +147,8 @@ class GPSoundGenerator:
         test_x = torch.linspace(start, end, self.sample_rate * x_range)
 
         with torch.no_grad(), gpytorch.settings.fast_pred_var():
-            f_preds = self.liklelihood(self.model(test_x))
-            f_samples = f_preds.sample().numpy()
+            with gpytorch.settings.fast_pred_samples():
+                f_preds = self.liklelihood(self.model(test_x))
+                f_samples = f_preds.sample().numpy()
 
         return f_samples

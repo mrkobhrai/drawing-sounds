@@ -51,7 +51,7 @@ def socket_handler(ws):
       response = handleRequest(request_body, 200)
       data_json = json.dumps(response)
       ws.send(data_json)    
-      response = handleRequest(request_body, 2000)
+      response = handleRequest(request_body, 1000)
       data_json = json.dumps(response)
       ws.send(data_json) 
       
