@@ -1,16 +1,17 @@
 import React from "react";
 import { Line, XAxis, YAxis, Tooltip, ComposedChart, Scatter } from 'recharts';
-import {FetchDataBody} from "../utils/PointFetcher";
+import {PointFetcher} from "../utils/PointFetcher";
 import Slider from "./Slider";
 import Dropdown from "./Dropdown";
 import Button from "./Button";
 import {Kernel, kernels, periodicKernel} from "../utils/Kernel";
 import SoundGenerator from "../utils/SoundGenerator";
+import {FetchDataBody, FetchRequestBody} from "../Interfaces";
 
 interface Props {
     width?: number,
     height?: number,
-    sendDataFunc: (body: FetchDataBody) => void
+    pointFetcher: PointFetcher,
 }
 
 interface State {
@@ -73,16 +74,23 @@ class SoundGraph extends React.Component<Props, State> {
         return this.state.userPoints.map(point => [point.x, point.y])
     }
 
-    onPlot = async () => {
+    onPlot = async (optimiseParams = false) => {
         // Get the user points
         const userData = this.getUserPoints();
         // Get the gaussian data
-        await this.props.sendDataFunc({points: userData, kernel: this.state.kernel.name, params: this.state.params});
+        await this.props.pointFetcher.sendData({points: userData, kernel: this.state.kernel.name, params: this.state.params, optimiseParams});
     }
 
     onData = (data: any) => {
-        const generatedData: number[] =  JSON.parse(data)
-        this.updateGeneratedPoints(generatedData)
+        let generatedData: number[] | FetchRequestBody = JSON.parse(data)
+        if (Array.isArray(generatedData)) {
+            this.updateGeneratedPoints(generatedData as number[])
+        } else {
+            this.updateGeneratedPoints(generatedData.data);
+            generatedData.params.forEach((keyValue) => {
+                this.state.params.set(keyValue.name, keyValue.value)
+            })
+        }
     }
 
     updateGeneratedPoints = (generatedData: number[]) => {
@@ -107,28 +115,27 @@ class SoundGraph extends React.Component<Props, State> {
     }
 
     generateKernelDropdownAndParameters = () => {
-        return (
-            <tr>
-                <td className="params">
-                    <label className="paramLabel">
-                        <Dropdown keyVals={new Map(kernels.map(kernel => [kernel.label, kernel.name]))} onChange={(e) => {
-                            this.resetPoints()
-                            this.state.params.clear()
-                            this.setState({kernel: kernels.find(kernel => kernel.name === e.target.value)!})
-                        }}/>
-                    </label>
-                    {this.state.kernel.parameters.map(param => {
-                        if (!this.state.params.has(param.name)) {
-                            this.state.params.set(param.name, param.default)
-                        }
-                        return <Slider key={param.name} name={param.label} min={param.min} max={param.max} value={this.state.params.get(param.name)!} onChange={(e) => {
-                            this.state.params.set(param.name, parseInt(e.target.value))
-                            this.setState({})
-                        }}/>
-                    })}
-                </td>
-            </tr>
-        );
+        return <tr>
+            <td className="params">
+                <label className="paramLabel">
+                    <Dropdown keyVals={new Map(kernels.map(kernel => [kernel.label, kernel.name]))} onChange={(e) => {
+                        this.resetPoints()
+                        this.state.params.clear()
+                        this.setState({kernel: kernels.find(kernel => kernel.name == e.target.value)!})
+                    }}/>
+                </label>
+                {this.state.kernel.parameters.map(param => {
+                    if (!this.state.params.has(param.name)) {
+                        this.state.params.set(param.name, param.default)
+                    }
+                    return <Slider key={param.name} name={param.label} min={param.min} max={param.max} value={this.state.params.get(param.name)!} onChange={(e) => {
+                        this.state.params.set(param.name, parseInt(e.target.value))
+                        this.setState({})
+                    }}/>
+                })}
+                <Button label="Optimise Parameters" onChange={() => this.onPlot(true)}/>
+            </td>
+        </tr>
 
     }
 
@@ -137,7 +144,7 @@ class SoundGraph extends React.Component<Props, State> {
             <tbody>
                 <tr>
                     <td className="params">
-                        <Button label="Resample Graph" onChange={this.onPlot}/>
+                        <Button label="Resample Graph" onChange={() => this.onPlot()}/>
                     </td>
                     <td className="params">
                         <Button label="Reset Graph" onChange={this.resetPoints}/>
