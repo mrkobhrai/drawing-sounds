@@ -56,7 +56,7 @@ def generate_handler():
     # Process input
     response = {}
     response["samples"] = [data]
-    # response["params"] = updated_params
+    response["params"] = updated_params
 
     return response
 
