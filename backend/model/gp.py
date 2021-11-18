@@ -89,13 +89,15 @@ class GPSoundGenerator:
         self.train_x = np.array([])
         self.train_y = np.array([])
 
-    def update_train_data(self, train_x, train_y, params, kernel_name):
+    def update_train_data(self, train_x, train_y, params, kernel_name, 
+                          n_datapoints):
         self.train_x = torch.from_numpy(
             np.array(train_x, dtype=np.float32).reshape(-1, 1))
         self.train_y = torch.from_numpy(
             np.array(train_y, dtype=np.float32))
         self.model = GaussianProcess(
             self.train_x, self.train_y, self.liklelihood, params, kernel_name)
+        self.sample_rate = n_datapoints
 
     # Train GP model to find right hyperparameter
     def fit(self, train_iter=50, lr=0.1, verbose=0, update_every=5):

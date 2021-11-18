@@ -14,7 +14,7 @@ cors = CORS(app, resources={r"/": {"origins": "http://localhost:3000"}})
 sound_generator = GPSoundGenerator(sample_rate=1000)
 
 
-def handleRequest(request_body,  n_datapoints=1000):
+def handleRequest(request_body, n_datapoints=1000):
     points = request_body['points']
     points = [(point[0], point[1]) for point in points]
     xs, ys = map(list, zip(*points))
@@ -24,7 +24,7 @@ def handleRequest(request_body,  n_datapoints=1000):
     if kernel_name is None:
         kernel_name = 'exponentiated_quadratic_kernel'
     params = request_body
-    sound_generator.update_train_data(xs, ys, params, kernel_name)
+    sound_generator.update_train_data(xs, ys, params, kernel_name, n_datapoints)
 
     if request_body['optimiseParams']:
        trained_params = sound_generator.fit()    
@@ -35,7 +35,11 @@ def handleRequest(request_body,  n_datapoints=1000):
     print(points_gp)
     print(trained_params)
 
-    return points_gp.tolist(), trained_params
+    response = {}
+    response["data"] = points_gp.tolist()
+    response["params"] = trained_params
+
+    return response
 
 
 @sock.route('/gaussian')
@@ -43,11 +47,12 @@ def socket_handler(ws):
    while True:
       raw_data = ws.receive()
       request_body = json.loads(raw_data)
-      data = handleRequest(request_body, 50)
-      data_json = json.dumps(data)
+
+      response = handleRequest(request_body, 200)
+      data_json = json.dumps(response)
       ws.send(data_json)    
-      data = handleRequest(request_body, 1000)
-      data_json = json.dumps(data)
+      response = handleRequest(request_body, 2000)
+      data_json = json.dumps(response)
       ws.send(data_json) 
       
 
