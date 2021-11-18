@@ -60,20 +60,20 @@ class GaussianProcess(gpytorch.models.ExactGP):
         params = {}
         
         if self.kernel_name == 'spectral_mixture_kernel':
-            params['lengthscale'] = self.covar_module.base_kernel.lengthscale
+            params['lengthscale'] = self.covar_module.base_kernel.lengthscale.item()
 
         elif self.kernel_name == 'periodic_kernel':
-            params['lengthscale'] = self.covar_module.base_kernel.lengthscale
-            params['outputscale'] = self.covar_module.outputscale
-            params['period_length'] = self.covar_module.base_kernel.period_length 
+            params['lengthscale'] = self.covar_module.base_kernel.lengthscale.item()
+            params['outputscale'] = self.covar_module.outputscale.item()
+            params['period_length'] = self.covar_module.base_kernel.period_length.item()
 
         elif self.kernel_name == 'exponentiated_quadratic_kernel':
-            params['lengthscale'] = self.covar_module.base_kernel.lengthscale
-            params['outputscale'] = self.covar_module.outputscale
+            params['lengthscale'] = self.covar_module.base_kernel.lengthscale.item()
+            params['outputscale'] = self.covar_module.outputscale.item()
 
         elif self.kernel_name == 'rational_quadratic_kernel':
-            params['lengthscale'] = self.covar_module.base_kernel.lengthscale
-            params['outputscale'] = self.covar_module.outputscale
+            params['lengthscale'] = self.covar_module.base_kernel.lengthscale.item()
+            params['outputscale'] = self.covar_module.outputscale.item()
 
         else:
             return None
