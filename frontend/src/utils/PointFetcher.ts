@@ -39,7 +39,7 @@ class PointFetcher {
             points: body.points,
             kernel: body.kernel,
             ...Object.fromEntries(body.params),
-            optimiseParams: body.optimiseParams ?? false,
+            optimiseParams: body.optimiseParams,
         };
 
         if(body.points.length > 2){

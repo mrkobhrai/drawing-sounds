@@ -6,7 +6,7 @@ import Dropdown from "./Dropdown";
 import Button from "./Button";
 import {Kernel, kernels, periodicKernel} from "../utils/Kernel";
 import SoundGenerator from "../utils/SoundGenerator";
-import {FetchDataBody, FetchRequestBody} from "../Interfaces";
+import {FetchRequestBody} from "../Interfaces";
 
 interface Props {
     width?: number,
@@ -82,15 +82,12 @@ class SoundGraph extends React.Component<Props, State> {
     }
 
     onData = (data: any) => {
-        let generatedData: number[] | FetchRequestBody = JSON.parse(data)
-        if (Array.isArray(generatedData)) {
-            this.updateGeneratedPoints(generatedData as number[])
-        } else {
-            this.updateGeneratedPoints(generatedData.data);
-            generatedData.params.forEach((keyValue) => {
-                this.state.params.set(keyValue.name, keyValue.value)
-            })
-        }
+        let generatedData: FetchRequestBody = JSON.parse(data)
+        console.log(generatedData)
+        this.updateGeneratedPoints(generatedData.data);
+        generatedData.params?.forEach((keyValue) => {
+            this.state.params.set(keyValue.name, keyValue.value)
+        })
     }
 
     updateGeneratedPoints = (generatedData: number[]) => {

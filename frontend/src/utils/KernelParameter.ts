@@ -37,19 +37,3 @@ export const alphaParam: Parameter = {
     max: 10,
     default: 1,
 }
-
-export const periodicLengthScaleParam: Parameter = {
-    name: 'periodic_lengthscale',
-    label: 'Periodic Length Scale',
-    min: 0,
-    max: 10,
-    default: 1,
-}
-
-export const localLengthScaleParam: Parameter = {
-    name: 'local_lengthscale',
-    label: 'Local length Scale',
-    min: 0,
-    max: 10,
-    default: 1,
-}

@@ -2,12 +2,12 @@ export interface FetchDataBody {
     points: number[][],
     kernel: string,
     params: Map<string, number>,
-    optimiseParams?: boolean,
+    optimiseParams: boolean,
 }
 
 export interface FetchRequestBody {
     data: number[],
-    params: {
+    params?: {
         name: string,
         value: number,
     }[]

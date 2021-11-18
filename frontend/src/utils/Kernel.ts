@@ -1,9 +1,8 @@
 import {
     alphaParam,
     amplitudeParam,
-    lengthScaleParam, localLengthScaleParam,
+    lengthScaleParam,
     Parameter,
-    periodicLengthScaleParam,
     periodParam
 } from "./KernelParameter";
 
@@ -31,10 +30,4 @@ export const periodicKernel: Kernel = {
     parameters: [lengthScaleParam, periodParam, amplitudeParam]
 }
 
-export const localPeriodicKernel: Kernel = {
-    name: 'local_periodic_kernel',
-    label: 'Local Periodic Kernel',
-    parameters: [periodicLengthScaleParam, periodParam, localLengthScaleParam, amplitudeParam]
-}
-
-export const kernels = [exponentiatedQuadraticKernel, rationalQuadraticKernel, periodicKernel, localPeriodicKernel]
+export const kernels = [exponentiatedQuadraticKernel, rationalQuadraticKernel, periodicKernel]
