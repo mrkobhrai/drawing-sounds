@@ -74,11 +74,11 @@ class SoundGraph extends React.Component<Props, State> {
         return this.state.userPoints.map(point => [point.x, point.y])
     }
 
-    onPlot = async () => {
+    onPlot = async (optimiseParams = false) => {
         // Get the user points
         const userData = this.getUserPoints();
         // Get the gaussian data
-        await this.props.pointFetcher.sendData({points: userData, kernel: this.state.kernel.name, params: this.state.params});
+        await this.props.pointFetcher.sendData({points: userData, kernel: this.state.kernel.name, params: this.state.params, optimiseParams});
     }
 
     onData = (data: any) => {
@@ -91,16 +91,6 @@ class SoundGraph extends React.Component<Props, State> {
                 this.state.params.set(keyValue.name, keyValue.value)
             })
         }
-    }
-
-    optimiseParams = async () => {
-        const userData = this.getUserPoints();
-        await this.props.pointFetcher.sendData({
-            points: userData,
-            kernel: this.state.kernel.name,
-            params: this.state.params,
-            optimiseParams: true,
-        })
     }
 
     updateGeneratedPoints = (generatedData: number[]) => {
@@ -143,7 +133,7 @@ class SoundGraph extends React.Component<Props, State> {
                         this.setState({})
                     }}/>
                 })}
-                <Button label="Optimise Parameters" onChange={() => {console.log('clicked')}}/>
+                <Button label="Optimise Parameters" onChange={() => this.onPlot(true)}/>
             </td>
         </tr>
 
@@ -154,7 +144,7 @@ class SoundGraph extends React.Component<Props, State> {
             <tbody>
                 <tr>
                     <td className="params">
-                        <Button label="Resample Graph" onChange={this.onPlot}/>
+                        <Button label="Resample Graph" onChange={() => this.onPlot()}/>
                     </td>
                     <td className="params">
                         <Button label="Reset Graph" onChange={this.resetPoints}/>
