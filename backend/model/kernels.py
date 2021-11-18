@@ -129,7 +129,6 @@ def parse_kernel(kernel_name, params):
         return kernel
     elif kernel_name == 'rational_quadratic_kernel':
         kernel = RationalQuadraticKernel()
-        
         lengthscale = params.get('lengthscale')
         alpha = params.get('alpha')
         amplitude = params.get('amplitude')

@@ -1,6 +1,7 @@
 from flask import Flask, request
+import gpytorch
 
-from model import GaussianProcess, parse_kernel
+from model import GaussianProcess, GPSoundGenerator
 from flask_cors import CORS
 from flask_sock import Sock
 import json
@@ -9,23 +10,31 @@ app = Flask(__name__)
 sock = Sock(app)
 cors = CORS(app, resources={r"/": {"origins": "http://localhost:3000"}})
 
-def handleRequest(request_body,  n_datapoints=1000):
-      gaussian_process = GaussianProcess(x_range=(0, 5), n_datapoints=n_datapoints)
-      points = request_body['points']
-      points = [(point[0], point[1]) for point in points]
-      xs, ys = map(list, zip(*points))
 
-      # # Set kernel and its parameters
-      kernel_name = request_body['kernel']
-      if kernel_name is None:
-         kernel_name = 'periodic_kernel'
-      params = request_body
-      kernel = parse_kernel(kernel_name, params)
-      gaussian_process.kernel = kernel
-      # # Perform Gaussian process
-      gaussian_process.update_data(xs, ys)
-      points_gp = gaussian_process.sample_from_posterior()
-      return points_gp.tolist()
+def handleRequest(request_body,  n_datapoints=1000):
+    sound_generator = GPSoundGenerator(sample_rate=10000)
+    points = request_body['points']
+    points = [(point[0], point[1]) for point in points]
+    xs, ys = map(list, zip(*points))
+
+    # Set kernel and its parameters
+    kernel_name = request_body.get('kernel')
+    if kernel_name is None:
+        kernel_name = 'exponentiated_quadratic_kernel'
+    params = request_body
+    
+    sound_generator.update_train_data(xs, ys, params, kernel_name)
+
+    if request_body['optimiseParams']:
+       trained_params = sound_generator.fit()    
+    
+    points_gp = sound_generator.sample_from_posterior()
+
+    # Process input
+    response = {}
+    response["samples"] = [points_gp.tolist()]
+    response["params"] = trained_params
+    return points_gp.tolist(), trained_params
 
 @sock.route('/gaussian')
 def socket_handler(ws):
@@ -43,15 +52,17 @@ def socket_handler(ws):
 @app.route('/', methods=['POST'])
 def generate_handler():
     request_body = request.get_json()
-    data = handleRequest(request_body)
+    data, updated_params = handleRequest(request_body)
     # Process input
     response = {}
     response["samples"] = [data]
+    # response["params"] = updated_params
+
     return response
 
 
 if __name__ == '__main__':
-    app.run()
+    app.run(host='0.0.0.0', port=3000)
 
 """
 REQ format: array of (array of [x, y] points)
