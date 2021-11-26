@@ -48,10 +48,10 @@ def socket_handler(ws):
       raw_data = ws.receive()
       request_body = json.loads(raw_data)
 
-      response = handleRequest(request_body, 200)
+      response = handleRequest(request_body, 80)
       data_json = json.dumps(response)
       ws.send(data_json)    
-      response = handleRequest(request_body, 1000)
+      response = handleRequest(request_body, 400)
       data_json = json.dumps(response)
       ws.send(data_json) 
       
