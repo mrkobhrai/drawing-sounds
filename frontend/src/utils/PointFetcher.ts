@@ -41,6 +41,7 @@ class PointFetcher {
             ...Object.fromEntries(body.params),
             optimiseParams: body.optimiseParams,
             dataTag,
+            batches: [80, 400],
         };
 
         if (this.ws.readyState) {
