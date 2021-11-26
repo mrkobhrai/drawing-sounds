@@ -42,10 +42,8 @@ class PointFetcher {
             optimiseParams: body.optimiseParams,
         };
 
-        if(body.points.length > 2){
-            if (this.ws.readyState) {
-                this.ws.send(JSON.stringify(postBody))
-            }
+        if (this.ws.readyState) {
+            this.ws.send(JSON.stringify(postBody))
         }
     }
 }
