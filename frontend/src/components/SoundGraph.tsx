@@ -29,6 +29,7 @@ class SoundGraph extends React.Component<Props, State> {
     width = this.props.width ?? 1000
     height = this.props.height ?? 500
     axisLength = 50
+    dataTag = 0
 
     state: State = {
         userPoints: [],
@@ -48,6 +49,7 @@ class SoundGraph extends React.Component<Props, State> {
         if (e) {
             const xCoord = e.chartX;
             const yCoord = e.chartY;
+            this.dataTag += 1;
             const x = this.calcXFromXCoord(xCoord);
             const y = this.calcYFromYCoord(yCoord);
             this.state.userPoints.push({x, y});
@@ -78,16 +80,17 @@ class SoundGraph extends React.Component<Props, State> {
         // Get the user points
         const userData = this.getUserPoints();
         // Get the gaussian data
-        await this.props.pointFetcher.sendData({points: userData, kernel: this.state.kernel.name, params: this.state.params, optimiseParams});
+        this.props.pointFetcher.sendData({ points: userData, kernel: this.state.kernel.name, params: this.state.params, optimiseParams}, this.dataTag);
     }
 
     onData = (data: any) => {
-        let generatedData: FetchRequestBody = JSON.parse(data)
-        console.log(generatedData)
-        this.updateGeneratedPoints(generatedData.data);
-        generatedData.params?.forEach((keyValue) => {
-            this.state.params.set(keyValue.name, keyValue.value)
-        })
+        let generatedData: FetchRequestBody = JSON.parse(data);
+        if(generatedData['dataTag'] === this.dataTag){
+            this.updateGeneratedPoints(generatedData.data);
+            generatedData.params?.forEach((keyValue) => {
+                this.state.params.set(keyValue.name, keyValue.value)
+            })
+        }
     }
 
     updateGeneratedPoints = (generatedData: number[]) => {

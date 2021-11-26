@@ -11,4 +11,5 @@ export interface FetchRequestBody {
         name: string,
         value: number,
     }[]
+    dataTag: number,
 }

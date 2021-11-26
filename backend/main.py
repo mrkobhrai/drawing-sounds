@@ -35,7 +35,7 @@ def handleRequest(request_body, n_datapoints=1000):
     print(points_gp)
     print(trained_params)
 
-    response = {}
+    response = {'dataTag': request_body['dataTag']}
     response["data"] = points_gp.tolist()
     response["params"] = trained_params
 
