@@ -1,5 +1,6 @@
 class SoundGenerator {
     audioSource: AudioBufferSourceNode | undefined;
+    audioContext: AudioContext | undefined;
     started: boolean
 
     constructor () {
@@ -7,23 +8,22 @@ class SoundGenerator {
     }
 
     play = () => {
-        if (typeof this.audioSource !== 'undefined') {
+        if (typeof this.audioContext !== 'undefined') {
             // TODO should not call start if already running
-            this.audioSource?.start();
+            this.audioContext?.resume();
             this.started = true;
         }
     }
 
     pause = () => {
-        if (this.started) {
-            this.audioSource?.stop();
-            this.started = false;
-        }
+        this.audioContext?.suspend();
+        this.started = false;
     }
 
     resetSound = () => {
         this.audioSource?.disconnect();
-        this.audioSource = undefined;
+        this.audioContext?.close();
+        this.audioContext = undefined;
     }
 
     generateSound = (points: {x: number, y: number}[]) => {
@@ -38,8 +38,12 @@ class SoundGenerator {
         source.connect(audioContext.destination);
         source.buffer = audioBuffer;
         this.audioSource = source;
+        this.audioContext = audioContext;
+        this.audioSource.start();
         if(this.started) {
             this.play();
+        } else {
+            this.pause();
         }
     }
 }
