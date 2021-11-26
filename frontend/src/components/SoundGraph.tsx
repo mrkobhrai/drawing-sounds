@@ -119,7 +119,7 @@ class SoundGraph extends React.Component<Props, State> {
             <td className="params">
                 <label className="paramLabel">
                     <Dropdown keyVals={new Map(kernels.map(kernel => [kernel.label, kernel.name]))} onChange={(e) => {
-                        this.resetPoints()
+                        this.onPlot();
                         this.state.params.clear()
                         this.setState({kernel: kernels.find(kernel => kernel.name == e.target.value)!})
                     }}/>
@@ -130,6 +130,7 @@ class SoundGraph extends React.Component<Props, State> {
                     }
                     return <Slider key={param.name} name={param.label} min={param.min} max={param.max} value={this.state.params.get(param.name)!} onChange={(e) => {
                         this.state.params.set(param.name, parseInt(e.target.value))
+                        this.onPlot();
                         this.setState({})
                     }}/>
                 })}
