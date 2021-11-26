@@ -9,7 +9,7 @@ export interface Parameter {
 export const lengthScaleParam: Parameter = {
     name: 'lengthscale',
     label: 'Length Scale',
-    min: 0,
+    min: 1,
     max: 10,
     default: 1,
 }
@@ -25,7 +25,7 @@ export const amplitudeParam: Parameter = {
 export const periodParam: Parameter = {
     name: 'period',
     label: 'Period',
-    min: 0,
+    min: 1,
     max: 10,
     default: 1,
 }
