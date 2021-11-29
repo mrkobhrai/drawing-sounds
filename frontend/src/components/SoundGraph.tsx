@@ -129,7 +129,9 @@ class SoundGraph extends React.Component<Props, State> {
                 }
                 return <Slider key={param.name} name={param.label} min={param.min} max={param.max} step={0.01} value={this.state.params.get(param.name)!} onChange={(e) => {
                     this.state.params.set(param.name, parseFloat(e.target.value))
-                    this.onPlot();
+                    this.setState({})
+                }} onMouseUp={() => {
+                    this.onPlot()
                     this.setState({})
                 }}/>
             })}
@@ -159,7 +161,7 @@ class SoundGraph extends React.Component<Props, State> {
                 </tr>
                 <tr>
                     <td className="params" colSpan={5}>
-                        <Slider name={`X Axis Range`} min={1} max={20} step={1} value={this.state.maxX} onChange={(e) => this.handleXAxisSet(e)}/>
+                        <Slider name={`X Axis Range`} min={1} max={20} step={1} value={this.state.maxX} onChange={(e) => this.handleXAxisSet(e)} onMouseUp={() => {}}/>
                     </td>
                 </tr>
                 <tr>
