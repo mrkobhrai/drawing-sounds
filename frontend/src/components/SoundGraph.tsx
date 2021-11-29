@@ -127,8 +127,8 @@ class SoundGraph extends React.Component<Props, State> {
                 if (!this.state.params.has(param.name)) {
                     this.state.params.set(param.name, param.default)
                 }
-                return <Slider key={param.name} name={param.label} min={param.min} max={param.max} step={1} value={this.state.params.get(param.name)!} onChange={(e) => {
-                    this.state.params.set(param.name, parseInt(e.target.value))
+                return <Slider key={param.name} name={param.label} min={param.min} max={param.max} step={0.01} value={this.state.params.get(param.name)!} onChange={(e) => {
+                    this.state.params.set(param.name, parseFloat(e.target.value))
                     this.onPlot();
                     this.setState({})
                 }}/>
