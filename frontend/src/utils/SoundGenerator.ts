@@ -49,11 +49,40 @@ class SoundGenerator {
         }
     }
 
+    sum(a: number[]){
+        return a.reduce((a, b) => a + b, 0);
+    }
+
+    concatFloatArray(arrays: Float32Array[]){
+        const lens = arrays.map(a => a.length)
+        const resultArray = new Float32Array(this.sum(lens));
+        for (let i=0; i<arrays.length; i++){
+            const start = this.sum(lens.slice(0,i));
+            resultArray.set(arrays[i],start);
+        }
+        return resultArray;
+    }
+
     downloadSound = () => {
         if (this.audioBuffer) {
+            // Replicate the stored buffer points into a Float array
+            const list = []
+            for (var i = 0; i < 100; i++) {
+                list.push(this.audioBuffer.getChannelData(0))
+            }
+            const arr = this.concatFloatArray(list)
+
+            // Create a buffer with all the replicated points
+            const buffer = new AudioBuffer({
+                numberOfChannels: this.audioBuffer.numberOfChannels,
+                length: arr.length,
+                sampleRate: this.audioBuffer.sampleRate,
+            })
+            buffer.copyToChannel(arr, 0)
+
             // Convert the buffer to a .wav format
             const toWav = require('audiobuffer-to-wav');
-            const wav = toWav(this.audioBuffer)
+            const wav = toWav(buffer)
 
             // Create the download URL
             const blob = new window.Blob([ new DataView(wav) ], {
