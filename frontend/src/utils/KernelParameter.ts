@@ -17,7 +17,7 @@ export const lengthScaleParam: Parameter = {
 export const amplitudeParam: Parameter = {
     name: 'amplitude',
     label: 'Amplitude',
-    min: 0,
+    min: 1,
     max: 10,
     default: 1,
 }
@@ -33,7 +33,7 @@ export const periodParam: Parameter = {
 export const alphaParam: Parameter = {
     name: 'alpha',
     label: 'Alpha',
-    min: 0,
+    min: 1,
     max: 10,
     default: 1,
 }

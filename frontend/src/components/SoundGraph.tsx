@@ -115,29 +115,26 @@ class SoundGraph extends React.Component<Props, State> {
     }
 
     generateKernelDropdownAndParameters = () => {
-        return <tr>
-            <td className="params">
-                <label className="paramLabel">
-                    <Dropdown keyVals={new Map(kernels.map(kernel => [kernel.label, kernel.name]))} onChange={(e) => {
-                        this.onPlot();
-                        this.state.params.clear()
-                        this.setState({kernel: kernels.find(kernel => kernel.name == e.target.value)!})
-                    }}/>
-                </label>
-                {this.state.kernel.parameters.map(param => {
-                    if (!this.state.params.has(param.name)) {
-                        this.state.params.set(param.name, param.default)
-                    }
-                    return <Slider key={param.name} name={param.label} min={param.min} max={param.max} value={this.state.params.get(param.name)!} onChange={(e) => {
-                        this.state.params.set(param.name, parseInt(e.target.value))
-                        this.onPlot();
-                        this.setState({})
-                    }}/>
-                })}
-                <Button label="Optimise Parameters" onChange={() => this.onPlot(true)}/>
-            </td>
-        </tr>
-
+        return <td className="params">
+            <label className="paramLabel">
+                <Dropdown keyVals={new Map(kernels.map(kernel => [kernel.label, kernel.name]))} onChange={(e) => {
+                    this.onPlot();
+                    this.state.params.clear()
+                    this.setState({kernel: kernels.find(kernel => kernel.name == e.target.value)!})
+                }}/>
+            </label>
+            {this.state.kernel.parameters.map(param => {
+                if (!this.state.params.has(param.name)) {
+                    this.state.params.set(param.name, param.default)
+                }
+                return <Slider key={param.name} name={param.label} min={param.min} max={param.max} step={1} value={this.state.params.get(param.name)!} onChange={(e) => {
+                    this.state.params.set(param.name, parseInt(e.target.value))
+                    this.onPlot();
+                    this.setState({})
+                }}/>
+            })}
+            <Button label="Optimise Parameters" onChange={() => this.onPlot(true)}/>
+        </td>
     }
 
     generateTable: () => JSX.Element = () => {
@@ -156,13 +153,18 @@ class SoundGraph extends React.Component<Props, State> {
                     <td className="params">
                         <Button label="Pause" onChange={this.soundGenerator().pause}/>
                     </td>
-                </tr>
-                <tr>
-                    <td className="params" colSpan={4}>
-                        <Slider name={`X Axis Range`} min={1} max={20} value={this.state.maxX} onChange={(e) => this.handleXAxisSet(e)}/>
+                    <td className={"params"}>
+                        <Button label="Download" onChange={this.soundGenerator().downloadSound}/>
                     </td>
                 </tr>
-                {this.generateKernelDropdownAndParameters()}
+                <tr>
+                    <td className="params" colSpan={5}>
+                        <Slider name={`X Axis Range`} min={1} max={20} step={1} value={this.state.maxX} onChange={(e) => this.handleXAxisSet(e)}/>
+                    </td>
+                </tr>
+                <tr>
+                    {this.generateKernelDropdownAndParameters()}
+                </tr>
             </tbody>
         </table>
     }
