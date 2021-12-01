@@ -2,6 +2,7 @@ import {ChangeEventHandler} from "react";
 
 interface Props {
     keyVals: Map<string, string>,
+    selectedValue: string
     onChange: ChangeEventHandler<HTMLSelectElement>
 }
 
@@ -11,7 +12,7 @@ const Dropdown: (props: Props) => JSX.Element = (props) => {
         options.push(<option key={key} label={key} value={value}/>)
     })
     return (
-        <select onChange={props.onChange}>
+        <select onChange={props.onChange} value={props.selectedValue}>
             {options}
         </select>
     )

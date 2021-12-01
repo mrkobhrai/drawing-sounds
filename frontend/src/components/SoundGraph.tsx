@@ -4,7 +4,7 @@ import {PointFetcher} from "../utils/PointFetcher";
 import Slider from "./Slider";
 import Dropdown from "./Dropdown";
 import Button from "./Button";
-import {Kernel, kernels, periodicKernel} from "../utils/Kernel";
+import {exponentiatedQuadraticKernel, Kernel, kernels} from "../utils/Kernel";
 import SoundGenerator from "../utils/SoundGenerator";
 import {FetchRequestBody} from "../Interfaces";
 
@@ -34,7 +34,7 @@ class SoundGraph extends React.Component<Props, State> {
     state: State = {
         userPoints: [],
         generatedPoints: [],
-        kernel: periodicKernel,
+        kernel: exponentiatedQuadraticKernel,
         params: new Map(),
         lengthScale: 1,
         maxX: 5,
@@ -117,8 +117,8 @@ class SoundGraph extends React.Component<Props, State> {
     generateKernelDropdownAndParameters = () => {
         return <td className="params">
             <label className="paramLabel">
-                <Dropdown keyVals={new Map(kernels.map(kernel => [kernel.label, kernel.name]))} onChange={(e) => {
-                    this.setState({kernel: kernels.find(kernel => kernel.name == e.target.value)!}, () => {
+                <Dropdown keyVals={new Map(kernels.map(kernel => [kernel.label, kernel.name]))} selectedValue={this.state.kernel.name} onChange={(e) => {
+                    this.setState({kernel: kernels.find(kernel => kernel.name === e.target.value)!}, () => {
                         this.onPlot()
                     })
                 }}/>
