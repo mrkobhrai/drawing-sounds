@@ -118,8 +118,9 @@ class SoundGraph extends React.Component<Props, State> {
         return <td className="params">
             <label className="paramLabel">
                 <Dropdown keyVals={new Map(kernels.map(kernel => [kernel.label, kernel.name]))} onChange={(e) => {
-                    this.onPlot();
-                    this.setState({kernel: kernels.find(kernel => kernel.name == e.target.value)!})
+                    this.setState({kernel: kernels.find(kernel => kernel.name == e.target.value)!}, () => {
+                        this.onPlot()
+                    })
                 }}/>
             </label>
             {this.state.kernel.parameters.map(param => {

@@ -22,7 +22,7 @@ class SoundGenerator {
     }
 
     resetSound = () => {
-        this.audioContext?.suspend();
+        this.pause();
         this.audioSource?.disconnect();
         this.audioContext?.close();
         this.audioContext = undefined;
