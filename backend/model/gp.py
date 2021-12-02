@@ -50,6 +50,9 @@ class GaussianProcess(gpytorch.models.ExactGP):
         
         return covar_module
     
+    def update_covar_module(self, params, kernel_name):
+        self.covar_module = self.parse_kernel(kernel_name, params)
+    
     def forward(self, x):
         mean_x = self.mean_module(x)
         covar_x = self.covar_module(x)
@@ -105,8 +108,15 @@ class GPSoundGenerator:
             np.array(train_x, dtype=np.float32).reshape(-1, 1))
         self.train_y = torch.from_numpy(
             np.array(train_y, dtype=np.float32))
-        self.model = GaussianProcess(
-            self.train_x, self.train_y, self.liklelihood, params, kernel_name)
+
+        if not self.model:
+            self.model = GaussianProcess(
+                self.train_x, self.train_y, self.liklelihood, 
+                params, kernel_name)
+        else:
+            self.model.get_fantasy_model(self.train_x, self,train_y)
+            self.model.update_covar_module(params, kernel_name)
+        
         self.sample_rate = n_datapoints
 
     # Train GP model to find right hyperparameter
@@ -146,8 +156,11 @@ class GPSoundGenerator:
         
         test_x = torch.linspace(start, end, self.sample_rate * x_range)
 
-        with torch.no_grad(), gpytorch.settings.fast_pred_var():
-            with gpytorch.settings.fast_pred_samples():
+        with gpytorch.settings.fast_computations():
+            with gpytorch.settings.fast_pred_var(), \
+                gpytorch.settings.fast_pred_samples(), \
+                    gpytorch.settings.use_toeplitz(), \
+                        gpytorch.settings.max_root_decomposition_size(50):
                 f_preds = self.liklelihood(self.model(test_x))
                 f_samples = f_preds.sample().numpy()
 

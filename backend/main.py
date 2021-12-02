@@ -1,10 +1,14 @@
-from flask import Flask, request
-import gpytorch
+import json
 
-from model import GaussianProcess, GPSoundGenerator
+from flask import Flask, request
 from flask_cors import CORS
 from flask_sock import Sock
-import json
+import torch
+
+from model import GaussianProcess, GPSoundGenerator
+
+
+torch.set_num_threads(1)
 
 app = Flask(__name__)
 sock = Sock(app)
