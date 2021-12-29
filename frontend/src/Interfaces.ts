@@ -1,4 +1,5 @@
 export interface FetchDataBody {
+    isAM: boolean,
     points: number[][],
     kernel: string,
     params: Map<string, number>,
@@ -6,6 +7,7 @@ export interface FetchDataBody {
 }
 
 export interface FetchRequestBody {
+    isAM: boolean,
     data: number[],
     params?: {
         name: string,

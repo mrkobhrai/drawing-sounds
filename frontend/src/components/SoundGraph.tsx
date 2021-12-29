@@ -17,6 +17,8 @@ interface Props {
 interface State {
     userPoints: { x: number; y: number; }[]
     generatedPoints: { x: number; y: number; }[]
+    userAMPoints: {x: number; y: number; }[]
+    generatedAMPoints: { x: number; y: number; }[]
     kernel: Kernel,
     params: Map<string, number>,
     lengthScale: number,
@@ -26,7 +28,7 @@ interface State {
 }
 
 class SoundGraph extends React.Component<Props, State> {
-    width = this.props.width ?? 1000
+    width = this.props.width ?? 500
     height = this.props.height ?? 500
     axisLength = 50
     dataTag = 0
@@ -34,6 +36,8 @@ class SoundGraph extends React.Component<Props, State> {
     state: State = {
         userPoints: [],
         generatedPoints: [],
+        userAMPoints: [],
+        generatedAMPoints: [],
         kernel: exponentiatedQuadraticKernel,
         params: new Map(),
         lengthScale: 1,
@@ -45,63 +49,79 @@ class SoundGraph extends React.Component<Props, State> {
 
     soundGenerator = () => this.state.soundGenerator;
 
-    handleGraphClick = (e:any) => {
+    handleGraphClick = (isAM: boolean) => (e:any) => {
         if (e) {
             const xCoord = e.chartX;
             const yCoord = e.chartY;
             this.dataTag += 1;
             const x = this.calcXFromXCoord(xCoord);
             const y = this.calcYFromYCoord(yCoord);
-            this.state.userPoints.push({x, y});
-            this.onPlot();
+            if (isAM) {
+                this.state.userAMPoints.push({x, y})
+                this.onPlot(true);
+            } else {
+                this.state.userPoints.push({x, y});
+                this.onPlot(false)
+            }
             this.setState({});
         }
     };
 
     handleXAxisSet = (e:any) => {
         this.setState({maxX: parseInt(e.target.value)});
-        this.onPlot();
+        this.onPlot(true);
+        this.onPlot(false);
     }
 
     handleLengthscaleSet = (e:any) => {
         this.setState({lengthScale: parseInt(e.target.value)});
-        this.onPlot();
+        this.onPlot(true);
+        this.onPlot(false);
     }
 
     calcXFromXCoord = (xCoord: number) => (xCoord - this.axisLength) / (this.width - this.axisLength) * this.state.maxX;
 
     calcYFromYCoord = (yCoord: number) => this.state.maxY - (yCoord / (this.height - this.axisLength) * this.state.maxY * 2);
 
-    getUserPoints: () => number[][] = () => {
-        return this.state.userPoints.map(point => [point.x, point.y])
+    getUserPoints: (isAM: boolean) => number[][] = (isAM) => {
+        if (isAM) {
+            return this.state.userAMPoints.map(point => [point.x, point.y]);
+        } else {
+            return this.state.userPoints.map(point => [point.x, point.y]);
+        }
     }
 
-    onPlot = async (optimiseParams = false) => {
+    onPlot = async (isAM: boolean, optimiseParams = false) => {
         // Get the user points
-        const userData = this.getUserPoints();
+        const userData = this.getUserPoints(isAM);
         // Get the gaussian data
-        this.props.pointFetcher.sendData({ points: userData, kernel: this.state.kernel.name, params: this.state.params, optimiseParams}, this.dataTag);
+        this.props.pointFetcher.sendData({ isAM: isAM, points: userData, kernel: this.state.kernel.name, params: this.state.params, optimiseParams}, this.dataTag);
     }
 
     onData = (data: any) => {
         let generatedData: FetchRequestBody = JSON.parse(data);
         if(generatedData['dataTag'] === this.dataTag){
-            this.updateGeneratedPoints(generatedData.data);
+            this.updateGeneratedPoints(generatedData.isAM, generatedData.data);
             generatedData.params?.forEach((keyValue) => {
                 this.state.params.set(keyValue.name, keyValue.value)
             })
         }
     }
 
-    updateGeneratedPoints = (generatedData: number[]) => {
+    updateGeneratedPoints = (isAM: boolean, generatedData: number[]) => {
         // Calculate the distribution for the number of data points and X axis
         const xDistribution = this.state.maxX / generatedData.length;
         // Filter returned values to be positive
         const structuredGeneratedData = generatedData.map((y, i) => ({x: xDistribution * i, y: y}));
-        // Generate the sound
-        this.soundGenerator().generateSound(structuredGeneratedData);
-        // Update the generated points state
-        this.state.generatedPoints = structuredGeneratedData;
+        if (isAM) {
+            // Update the generated points state
+            this.state.generatedAMPoints = structuredGeneratedData;
+        } else {
+            // Generate the sound
+            this.soundGenerator().generateSound(structuredGeneratedData);
+            // Update the generated points state
+            this.state.generatedPoints = structuredGeneratedData;
+        }
         // Force a component rerender by updating the state
         this.setState({});
     }
@@ -109,6 +129,8 @@ class SoundGraph extends React.Component<Props, State> {
     resetPoints = () => {
         this.state.userPoints.splice(0, this.state.userPoints.length)
         this.state.generatedPoints.splice(0, this.state.generatedPoints.length)
+        this.state.userAMPoints.splice(0, this.state.userAMPoints.length)
+        this.state.generatedAMPoints.splice(0, this.state.generatedAMPoints.length)
         this.state.params.clear()
         this.soundGenerator().resetSound();
         this.setState({})
@@ -119,7 +141,8 @@ class SoundGraph extends React.Component<Props, State> {
             <label className="paramLabel">
                 <Dropdown keyVals={new Map(kernels.map(kernel => [kernel.label, kernel.name]))} selectedValue={this.state.kernel.name} onChange={(e) => {
                     this.setState({kernel: kernels.find(kernel => kernel.name === e.target.value)!}, () => {
-                        this.onPlot()
+                        this.onPlot(true)
+                        this.onPlot(false)
                     })
                 }}/>
             </label>
@@ -131,11 +154,12 @@ class SoundGraph extends React.Component<Props, State> {
                     this.state.params.set(param.name, parseFloat(e.target.value))
                     this.setState({})
                 }} onMouseUp={() => {
-                    this.onPlot()
+                    this.onPlot(true)
+                    this.onPlot(false)
                     this.setState({})
                 }}/>
             })}
-            <Button label="Optimise Parameters" onChange={() => this.onPlot(true)}/>
+            <Button label="Optimise Parameters" onChange={() => this.onPlot(false, true)}/>
         </td>
     }
 
@@ -144,7 +168,7 @@ class SoundGraph extends React.Component<Props, State> {
             <tbody>
                 <tr>
                     <td className="params">
-                        <Button label="Resample Graph" onChange={() => this.onPlot()}/>
+                        <Button label="Resample Graph" onChange={() => this.onPlot(false, false)}/>
                     </td>
                     <td className="params">
                         <Button label="Reset Graph" onChange={this.resetPoints}/>
@@ -174,14 +198,28 @@ class SoundGraph extends React.Component<Props, State> {
     render () {
             return (
                 <div className="graphContainer">
+                    <table style={{margin: "0 0 0 11vw"}}>
+                        <tbody>
+                            <tr>
+                                <ComposedChart className="graph" width={this.width} height={this.height} onClick={this.handleGraphClick(false)} >
+                                    <Line type="monotone" dataKey="y" dot={false}  data={this.state.generatedPoints} />
+                                    <Scatter dataKey="y" fill="red" data={this.state.userPoints} />
+                                    <XAxis type="number" dataKey="x" domain={[0, this.state.maxX]} interval={0} tickCount={this.state.maxX + 1} height={this.axisLength} allowDataOverflow={true} />
+                                    <YAxis type="number" domain={[-this.state.maxY, this.state.maxY]} interval={0} ticks={[-this.state.maxY,0,this.state.maxY]} width={this.axisLength}  allowDataOverflow={true} />
+                                    <Tooltip />
+                                </ComposedChart>
+                                <ComposedChart className="graph" width={this.width} height={this.height} onClick={this.handleGraphClick(true)} >
+                                    <Line type="monotone" dataKey="y" dot={false}  data={this.state.generatedAMPoints} />
+                                    <Scatter dataKey="y" fill="red" data={this.state.userAMPoints} />
+                                    <XAxis type="number" dataKey="x" domain={[0, this.state.maxX]} interval={0} tickCount={this.state.maxX + 1} height={this.axisLength} allowDataOverflow={true} />
+                                    <YAxis type="number" domain={[-this.state.maxY, this.state.maxY]} interval={0} ticks={[-this.state.maxY,0,this.state.maxY]} width={this.axisLength}  allowDataOverflow={true} />
+                                    <Tooltip />
+                                </ComposedChart>
+                            </tr>
+                        </tbody>
+                    </table>
                     <div style={{margin: "0 0 0 17.5vw"}}>
-                        <ComposedChart width={this.width} height={this.height} onClick={this.handleGraphClick} >
-                            <Line type="monotone" dataKey="y" dot={false}  data={this.state.generatedPoints} />
-                            <Scatter dataKey="y" fill="red" data={this.state.userPoints} />
-                            <XAxis type="number" dataKey="x" domain={[0, this.state.maxX]} interval={0} tickCount={this.state.maxX + 1} height={this.axisLength} allowDataOverflow={true} />
-                            <YAxis type="number" domain={[-this.state.maxY, this.state.maxY]} interval={0} ticks={[-this.state.maxY,0,this.state.maxY]} width={this.axisLength}  allowDataOverflow={true} />
-                            <Tooltip />
-                        </ComposedChart>
+
                     </div>
                     {this.generateTable()}
                 </div>
