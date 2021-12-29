@@ -23,18 +23,19 @@ class SoundGenerator {
 
     resetSound = () => {
         this.pause();
+        this.audioBuffer = undefined
         this.audioSource?.disconnect();
         this.audioContext?.close();
         this.audioContext = undefined;
     }
 
     generateSound = (points: {x: number, y: number}[]) => {
+        this.resetSound();
         const sampleRate = 44100;
         const audioContext = new AudioContext({sampleRate});
         const waveArray  = new Float32Array(points.map((point) => point.y));
         this.audioBuffer = audioContext.createBuffer(1, waveArray.length, sampleRate);
         this.audioBuffer.copyToChannel(waveArray, 0);
-        this.resetSound();
         const source = audioContext.createBufferSource();
         source.loop = true;
         source.connect(audioContext.destination);

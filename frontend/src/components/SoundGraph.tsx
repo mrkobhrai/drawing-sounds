@@ -19,6 +19,9 @@ interface State {
     generatedPoints: { x: number; y: number; }[]
     userAMPoints: {x: number; y: number; }[]
     generatedAMPoints: { x: number; y: number; }[]
+    normalGraphSelected: boolean,
+    AMGraphSelected: boolean,
+    AMMode: boolean,
     kernel: Kernel,
     params: Map<string, number>,
     lengthScale: number,
@@ -38,6 +41,9 @@ class SoundGraph extends React.Component<Props, State> {
         generatedPoints: [],
         userAMPoints: [],
         generatedAMPoints: [],
+        normalGraphSelected: true,
+        AMGraphSelected: false,
+        AMMode: false,
         kernel: exponentiatedQuadraticKernel,
         params: new Map(),
         lengthScale: 1,
@@ -108,6 +114,19 @@ class SoundGraph extends React.Component<Props, State> {
         }
     }
 
+    updateSound = () => {
+        if (this.state.normalGraphSelected && this.state.AMGraphSelected) {
+            // TODO: AM using generatedPoints and generatedAMPoints
+        } else if (this.state.normalGraphSelected) {
+            // Generate the sound
+            this.soundGenerator().generateSound(this.state.generatedPoints);
+        } else if (this.state.AMGraphSelected) {
+            this.soundGenerator().generateSound(this.state.generatedAMPoints);
+        } else {
+            this.soundGenerator().resetSound()
+        }
+    }
+
     updateGeneratedPoints = (isAM: boolean, generatedData: number[]) => {
         // Calculate the distribution for the number of data points and X axis
         const xDistribution = this.state.maxX / generatedData.length;
@@ -117,21 +136,23 @@ class SoundGraph extends React.Component<Props, State> {
             // Update the generated points state
             this.state.generatedAMPoints = structuredGeneratedData;
         } else {
-            // Generate the sound
-            this.soundGenerator().generateSound(structuredGeneratedData);
             // Update the generated points state
             this.state.generatedPoints = structuredGeneratedData;
         }
+        this.updateSound()
         // Force a component rerender by updating the state
         this.setState({});
     }
 
     resetPoints = () => {
-        this.state.userPoints.splice(0, this.state.userPoints.length)
-        this.state.generatedPoints.splice(0, this.state.generatedPoints.length)
-        this.state.userAMPoints.splice(0, this.state.userAMPoints.length)
-        this.state.generatedAMPoints.splice(0, this.state.generatedAMPoints.length)
-        this.state.params.clear()
+        if (this.state.normalGraphSelected) {
+            this.state.userPoints.splice(0, this.state.userPoints.length)
+            this.state.generatedPoints.splice(0, this.state.generatedPoints.length)
+        }
+        if (this.state.AMGraphSelected) {
+            this.state.userAMPoints.splice(0, this.state.userAMPoints.length)
+            this.state.generatedAMPoints.splice(0, this.state.generatedAMPoints.length)
+        }
         this.soundGenerator().resetSound();
         this.setState({})
     }
@@ -141,8 +162,12 @@ class SoundGraph extends React.Component<Props, State> {
             <label className="paramLabel">
                 <Dropdown keyVals={new Map(kernels.map(kernel => [kernel.label, kernel.name]))} selectedValue={this.state.kernel.name} onChange={(e) => {
                     this.setState({kernel: kernels.find(kernel => kernel.name === e.target.value)!}, () => {
-                        this.onPlot(true)
-                        this.onPlot(false)
+                        if (this.state.normalGraphSelected) {
+                            this.onPlot(false)
+                        }
+                        if (this.state.AMGraphSelected) {
+                            this.onPlot(true)
+                        }
                     })
                 }}/>
             </label>
@@ -154,12 +179,23 @@ class SoundGraph extends React.Component<Props, State> {
                     this.state.params.set(param.name, parseFloat(e.target.value))
                     this.setState({})
                 }} onMouseUp={() => {
-                    this.onPlot(true)
-                    this.onPlot(false)
+                    if (this.state.normalGraphSelected) {
+                        this.onPlot(false)
+                    }
+                    if (this.state.AMGraphSelected) {
+                        this.onPlot(true)
+                    }
                     this.setState({})
                 }}/>
             })}
-            <Button label="Optimise Parameters" onChange={() => this.onPlot(false, true)}/>
+            <Button label="Optimise Parameters" onChange={() => {
+                if (this.state.normalGraphSelected) {
+                    this.onPlot(false, true)
+                }
+                if (this.state.AMGraphSelected) {
+                    this.onPlot(true, true)
+                }
+            }}/>
         </td>
     }
 
@@ -168,19 +204,32 @@ class SoundGraph extends React.Component<Props, State> {
             <tbody>
                 <tr>
                     <td className="params">
-                        <Button label="Resample Graph" onChange={() => this.onPlot(false, false)}/>
+                        <Button label="Resample Graph" onChange={() => {
+                            if (this.state.normalGraphSelected)  {
+                                this.onPlot(false)
+                            }
+                            if (this.state.AMGraphSelected) {
+                                this.onPlot(true)
+                            }
+                        }}/>
                     </td>
                     <td className="params">
                         <Button label="Reset Graph" onChange={this.resetPoints}/>
                     </td>
                     <td className="params">
-                        <Button label="Play" onChange={this.soundGenerator().play}/>
+                        <Button label="Play" onChange={() => {
+                            this.updateSound()
+                            this.soundGenerator().play()
+                        }}/>
                     </td>
                     <td className="params">
                         <Button label="Pause" onChange={this.soundGenerator().pause}/>
                     </td>
                     <td className={"params"}>
-                        <Button label="Download" onChange={this.soundGenerator().downloadSound}/>
+                        <Button label="Download" onChange={() => {
+                            this.updateSound()
+                            this.soundGenerator().downloadSound()
+                        }}/>
                     </td>
                 </tr>
                 <tr>
@@ -201,26 +250,41 @@ class SoundGraph extends React.Component<Props, State> {
                     <table style={{margin: "0 0 0 11vw"}}>
                         <tbody>
                             <tr>
-                                <ComposedChart className="graph" width={this.width} height={this.height} onClick={this.handleGraphClick(false)} >
-                                    <Line type="monotone" dataKey="y" dot={false}  data={this.state.generatedPoints} />
-                                    <Scatter dataKey="y" fill="red" data={this.state.userPoints} />
-                                    <XAxis type="number" dataKey="x" domain={[0, this.state.maxX]} interval={0} tickCount={this.state.maxX + 1} height={this.axisLength} allowDataOverflow={true} />
-                                    <YAxis type="number" domain={[-this.state.maxY, this.state.maxY]} interval={0} ticks={[-this.state.maxY,0,this.state.maxY]} width={this.axisLength}  allowDataOverflow={true} />
-                                    <Tooltip />
-                                </ComposedChart>
-                                <ComposedChart className="graph" width={this.width} height={this.height} onClick={this.handleGraphClick(true)} >
-                                    <Line type="monotone" dataKey="y" dot={false}  data={this.state.generatedAMPoints} />
-                                    <Scatter dataKey="y" fill="red" data={this.state.userAMPoints} />
-                                    <XAxis type="number" dataKey="x" domain={[0, this.state.maxX]} interval={0} tickCount={this.state.maxX + 1} height={this.axisLength} allowDataOverflow={true} />
-                                    <YAxis type="number" domain={[-this.state.maxY, this.state.maxY]} interval={0} ticks={[-this.state.maxY,0,this.state.maxY]} width={this.axisLength}  allowDataOverflow={true} />
-                                    <Tooltip />
-                                </ComposedChart>
+                                <td>
+                                    <ComposedChart className="graph" width={this.width} height={this.height} onClick={this.handleGraphClick(false)} >
+                                        <Line type="monotone" dataKey="y" dot={false}  data={this.state.generatedPoints} />
+                                        <Scatter dataKey="y" fill="red" data={this.state.userPoints} />
+                                        <XAxis type="number" dataKey="x" domain={[0, this.state.maxX]} interval={0} tickCount={this.state.maxX + 1} height={this.axisLength} allowDataOverflow={true} />
+                                        <YAxis type="number" domain={[-this.state.maxY, this.state.maxY]} interval={0} ticks={[-this.state.maxY,0,this.state.maxY]} width={this.axisLength}  allowDataOverflow={true} />
+                                        <Tooltip />
+                                    </ComposedChart>
+                                </td>
+                                <td>
+                                    <ComposedChart className="graph" width={this.width} height={this.height} onClick={this.handleGraphClick(true)} >
+                                        <Line type="monotone" dataKey="y" dot={false}  data={this.state.generatedAMPoints} />
+                                        <Scatter dataKey="y" fill="red" data={this.state.userAMPoints} />
+                                        <XAxis type="number" dataKey="x" domain={[0, this.state.maxX]} interval={0} tickCount={this.state.maxX + 1} height={this.axisLength} allowDataOverflow={true} />
+                                        <YAxis type="number" domain={[-this.state.maxY, this.state.maxY]} interval={0} ticks={[-this.state.maxY,0,this.state.maxY]} width={this.axisLength}  allowDataOverflow={true} />
+                                        <Tooltip />
+                                    </ComposedChart>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <p> Select for operations </p>
+                                    <input type={"checkbox"} defaultChecked={this.state.normalGraphSelected} onChange={() => {
+                                        this.setState({normalGraphSelected: !this.state.normalGraphSelected})
+                                    }}/>
+                                </td>
+                                <td>
+                                    <p> Select for operations </p>
+                                    <input type={"checkbox"} defaultChecked={this.state.AMGraphSelected} onChange={() => {
+                                        this.setState({AMGraphSelected: !this.state.AMGraphSelected})
+                                    }}/>
+                                </td>
                             </tr>
                         </tbody>
                     </table>
-                    <div style={{margin: "0 0 0 17.5vw"}}>
-
-                    </div>
                     {this.generateTable()}
                 </div>
             )

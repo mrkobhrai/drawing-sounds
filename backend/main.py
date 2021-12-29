@@ -42,6 +42,7 @@ def handleRequest(request_body, n_datapoints=1000):
     response = {'dataTag': request_body['dataTag']}
     response["data"] = points_gp.tolist()
     response["params"] = trained_params
+    response["isAM"] = request_body["isAM"]
 
     return response
 
@@ -66,6 +67,7 @@ def generate_handler():
     response = {}
     response["data"] =[data]
     response["params"] = updated_params
+    response["isAM"] = request_body["isAM"]
 
     return response
 
