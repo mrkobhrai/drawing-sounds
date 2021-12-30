@@ -11,7 +11,7 @@ class GaussianProcess(gpytorch.models.ExactGP):
         self.mean_module = gpytorch.means.ConstantMean()
         self.covar_module = self.parse_kernel(kernel_name, params)
         
-    def parse_kernel(self, kernel_name, params):
+    def parse_kernel(self, kernel_name, params): 
         self.kernel_name = kernel_name
         if kernel_name == 'spectral_mixture_kernel':
             n_mixtures = params.get('n_mixtures')
@@ -109,13 +109,13 @@ class GPSoundGenerator:
         self.train_y = torch.from_numpy(
             np.array(train_y, dtype=np.float32))
 
-        if not self.model:
-            self.model = GaussianProcess(
-                self.train_x, self.train_y, self.liklelihood, 
-                params, kernel_name)
-        else:
-            self.model.get_fantasy_model(self.train_x, self,train_y)
-            self.model.update_covar_module(params, kernel_name)
+        # if not self.model:
+        self.model = GaussianProcess(
+            self.train_x, self.train_y, self.liklelihood, 
+            params, kernel_name)
+        # else:
+        #     self.model.get_fantasy_model(self.train_x, self,train_y)
+        #     self.model.update_covar_module(params, kernel_name)
         
         self.sample_rate = n_datapoints
 
