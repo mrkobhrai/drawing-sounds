@@ -32,7 +32,8 @@ class SoundGraph extends React.Component<Props, State> {
     width = this.props.width ?? 1000
     height = this.props.height ?? 500
     axisLength = 50
-    dataTag = 0
+    soundDatatag = 0
+    amplitudeDatatag = 0
 
     state: State = {
         soundUserPoints: [],
@@ -55,12 +56,13 @@ class SoundGraph extends React.Component<Props, State> {
         if (e) {
             const xCoord = e.chartX;
             const yCoord = e.chartY;
-            this.dataTag += 1;
             const x = this.calcXFromXCoord(xCoord);
             const y = this.calcYFromYCoord(yCoord);
             if (this.isSoundMode()) {
+                this.soundDatatag += 1;
                 this.state.soundUserPoints.push({x, y});
             } else {
+                this.amplitudeDatatag += 1;
                 this.state.amplitudeUserPoints.push({x,y});
             }
             this.onPlot(this.isSoundMode());
@@ -92,36 +94,38 @@ class SoundGraph extends React.Component<Props, State> {
         return this.state.amplitudeUserPoints.map(point => [point.x, point.y])
     }
 
+    getTag = (soundMode: boolean) => soundMode ? this.soundDatatag : this.amplitudeDatatag
+
     onPlot = async (soundMode: boolean, optimiseParams = false) => {
         // Get the user points
         const userData = soundMode ? this.getUserSoundPoints() : this.getUserAmplitudePoints();
+        // Get the correct data tag
+        const tag = this.getTag(soundMode)
         // Get the gaussian data
-        this.props.pointFetcher.sendData({ points: userData, kernel: this.state.kernel.name, params: this.state.params, optimiseParams}, this.dataTag, soundMode);
+        this.props.pointFetcher.sendData({ points: userData, kernel: this.state.kernel.name, params: this.state.params, optimiseParams}, tag, soundMode);
     }
 
     onData = (data: any) => {
         let generatedData: FetchRequestBody = JSON.parse(data);
-        if(generatedData['dataTag'] === this.dataTag){
-            this.updateGeneratedPoints(generatedData.data, generatedData['soundMode']);
+        const soundMode = generatedData['soundMode'];
+        if(generatedData['dataTag'] === this.getTag(soundMode)){
+            this.updateGeneratedPoints(generatedData.data, soundMode);
             generatedData.params?.forEach((keyValue) => {
                 this.state.params.set(keyValue.name, keyValue.value)
             })
         }
     }
 
-    updateGeneratedPoints = (generatedData: number[], soundMode: boolean) => {
+    generateDistributedDataFromPoints = (points: number[]) => {
         // Calculate the distribution for the number of data points and X axis
-        const xDistribution = this.state.maxX / generatedData.length;
-        // Filter returned values to be positive
-        const structuredGeneratedData = generatedData.map((y, i) => ({x: xDistribution * i, y: y}));
-        if (soundMode) {
-            // Generate the sound
-            this.soundGenerator().generateSound(structuredGeneratedData);
-            // Update the generated points state
-            this.state.soundGeneratedPoints = structuredGeneratedData;
-        } else {
-            this.state.amplitudeGeneratedPoints = structuredGeneratedData;
-        }
+        const xDistribution = this.state.maxX / points.length;
+        return points.map((y, i) => ({x: xDistribution * i, y: y}));
+    }
+
+    updateGeneratedPoints = (generatedData: number[], soundMode: boolean) => {
+        this.state.soundGeneratedPoints = soundMode ? this.generateDistributedDataFromPoints(generatedData) : this.state.soundGeneratedPoints;
+        this.state.amplitudeGeneratedPoints = !soundMode ? this.generateDistributedDataFromPoints(generatedData) : this.state.amplitudeGeneratedPoints;
+        this.soundGenerator().generateSound(this.state.soundGeneratedPoints, this.state.amplitudeGeneratedPoints);
         // Force a component rerender by updating the state
         this.setState({});
     }
