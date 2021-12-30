@@ -12,4 +12,5 @@ export interface FetchRequestBody {
         value: number,
     }[]
     dataTag: number,
+    soundMode: boolean,
 }

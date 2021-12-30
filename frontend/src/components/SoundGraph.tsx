@@ -63,55 +63,65 @@ class SoundGraph extends React.Component<Props, State> {
             } else {
                 this.state.amplitudeUserPoints.push({x,y});
             }
-            this.onPlot();
+            this.onPlot(this.isSoundMode());
             this.setState({});
         }
     };
 
     handleXAxisSet = (e:any) => {
         this.setState({maxX: parseInt(e.target.value)});
-        this.onPlot();
+        this.onPlot(true);
+        this.onPlot(false);
     }
 
     handleLengthscaleSet = (e:any) => {
         this.setState({lengthScale: parseInt(e.target.value)});
-        this.onPlot();
+        this.onPlot(true);
+        this.onPlot(false);
     }
 
     calcXFromXCoord = (xCoord: number) => (xCoord - this.axisLength) / (this.width - this.axisLength) * this.state.maxX;
 
     calcYFromYCoord = (yCoord: number) => this.state.maxY - (yCoord / (this.height - this.axisLength) * this.state.maxY * 2);
 
-    getUserPoints: () => number[][] = () => {
+    getUserSoundPoints: () => number[][] = () => {
         return this.state.soundUserPoints.map(point => [point.x, point.y])
     }
 
-    onPlot = async (optimiseParams = false) => {
+    getUserAmplitudePoints: () => number[][] = () => {
+        return this.state.amplitudeUserPoints.map(point => [point.x, point.y])
+    }
+
+    onPlot = async (soundMode: boolean, optimiseParams = false) => {
         // Get the user points
-        const userData = this.getUserPoints();
+        const userData = soundMode ? this.getUserSoundPoints() : this.getUserAmplitudePoints();
         // Get the gaussian data
-        this.props.pointFetcher.sendData({ points: userData, kernel: this.state.kernel.name, params: this.state.params, optimiseParams}, this.dataTag);
+        this.props.pointFetcher.sendData({ points: userData, kernel: this.state.kernel.name, params: this.state.params, optimiseParams}, this.dataTag, soundMode);
     }
 
     onData = (data: any) => {
         let generatedData: FetchRequestBody = JSON.parse(data);
         if(generatedData['dataTag'] === this.dataTag){
-            this.updateGeneratedPoints(generatedData.data);
+            this.updateGeneratedPoints(generatedData.data, generatedData['soundMode']);
             generatedData.params?.forEach((keyValue) => {
                 this.state.params.set(keyValue.name, keyValue.value)
             })
         }
     }
 
-    updateGeneratedPoints = (generatedData: number[]) => {
+    updateGeneratedPoints = (generatedData: number[], soundMode: boolean) => {
         // Calculate the distribution for the number of data points and X axis
         const xDistribution = this.state.maxX / generatedData.length;
         // Filter returned values to be positive
         const structuredGeneratedData = generatedData.map((y, i) => ({x: xDistribution * i, y: y}));
-        // Generate the sound
-        this.soundGenerator().generateSound(structuredGeneratedData);
-        // Update the generated points state
-        this.state.soundGeneratedPoints = structuredGeneratedData;
+        if (soundMode) {
+            // Generate the sound
+            this.soundGenerator().generateSound(structuredGeneratedData);
+            // Update the generated points state
+            this.state.soundGeneratedPoints = structuredGeneratedData;
+        } else {
+            this.state.amplitudeGeneratedPoints = structuredGeneratedData;
+        }
         // Force a component rerender by updating the state
         this.setState({});
     }

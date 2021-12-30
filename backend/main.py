@@ -37,7 +37,10 @@ def handleRequest(request_body, n_datapoints=1000):
     
     points_gp = sound_generator.sample_from_posterior((0, 5))
 
-    response = {'dataTag': request_body['dataTag']}
+    response = {
+       'dataTag': request_body['dataTag'],
+       'soundMode': request_body['soundMode'],    
+   }
     response["data"] = points_gp.tolist()
     response["params"] = trained_params
 
