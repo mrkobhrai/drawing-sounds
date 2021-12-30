@@ -19,6 +19,7 @@ interface State {
     soundGeneratedPoints: { x: number; y: number; }[]
     amplitudeUserPoints: { x: number; y: number; }[]
     amplitudeGeneratedPoints: { x: number; y: number; }[]
+    isSoundMode: boolean,
     kernel: Kernel,
     params: Map<string, number>,
     lengthScale: number,
@@ -38,13 +39,13 @@ class SoundGraph extends React.Component<Props, State> {
         soundGeneratedPoints: [],
         amplitudeUserPoints: [],
         amplitudeGeneratedPoints: [],
+        isSoundMode: true, // true when in sound mode, false when in amp modulation mode
         kernel: exponentiatedQuadraticKernel,
         params: new Map(),
         lengthScale: 1,
         maxX: 5,
         maxY: 10,
-        soundGenerator: new SoundGenerator(),
-        
+        soundGenerator: new SoundGenerator(),   
     }
 
 
@@ -57,7 +58,11 @@ class SoundGraph extends React.Component<Props, State> {
             this.dataTag += 1;
             const x = this.calcXFromXCoord(xCoord);
             const y = this.calcYFromYCoord(yCoord);
-            this.state.soundUserPoints.push({x, y});
+            if (this.isSoundMode()) {
+                this.state.soundUserPoints.push({x, y});
+            } else {
+                this.state.amplitudeUserPoints.push({x,y});
+            }
             this.onPlot();
             this.setState({});
         }
@@ -119,6 +124,14 @@ class SoundGraph extends React.Component<Props, State> {
         this.setState({})
     }
 
+    isSoundMode = () => this.state.isSoundMode
+
+    isAmplitudeMode = () => !this.state.isSoundMode
+
+    soundGraphColour = () => this.isSoundMode() ? "blue":"lightblue"
+
+    amplitudeGraphColour = () => (!this.isSoundMode()) ? "red":"pink"
+
     generateKernelDropdownAndParameters = () => {
         return <td className="params">
             <label className="paramLabel">
@@ -148,6 +161,9 @@ class SoundGraph extends React.Component<Props, State> {
         return <table className="params">
             <tbody>
                 <tr>
+                    <td className={"params"} >
+                        <Dropdown keyVals={new Map([['Sound Mode', 'sound'], ['Amplitude Mode', 'amplitude']])} selectedValue={this.isSoundMode() ? 'sound':'amplitude'} onChange={(e)=>this.setState({isSoundMode: e.target.value === 'sound'})}/>
+                    </td>
                     <td className="params">
                         <Button label="Resample Graph" onChange={() => this.onPlot()}/>
                     </td>
@@ -165,7 +181,7 @@ class SoundGraph extends React.Component<Props, State> {
                     </td>
                 </tr>
                 <tr>
-                    <td className="params" colSpan={5}>
+                    <td className="params" colSpan={7}>
                         <Slider name={`X Axis Range`} min={1} max={20} step={1} value={this.state.maxX} onChange={(e) => this.handleXAxisSet(e)} onMouseUp={() => {}}/>
                     </td>
                 </tr>
@@ -181,10 +197,10 @@ class SoundGraph extends React.Component<Props, State> {
                 <div className="graphContainer">
                     <div style={{margin: "0 0 0 17.5vw"}}>
                         <ComposedChart width={this.width} height={this.height} onClick={this.handleGraphClick} >
-                            <Line dataKey="y" dot={false}  data={this.state.soundGeneratedPoints} stroke="blue" />
-                            <Scatter dataKey="y" fill="blue" data={this.state.soundUserPoints} />
-                            <Line dataKey="y" dot={false}  data={this.state.amplitudeGeneratedPoints} stroke="red" />
-                            <Scatter dataKey="y" fill="red" data={this.state.amplitudeUserPoints} />
+                            <Line dataKey="y" dot={false}  data={this.state.soundGeneratedPoints} stroke={this.soundGraphColour()} />
+                            <Scatter dataKey="y" fill={this.soundGraphColour()} data={this.state.soundUserPoints} />
+                            <Line dataKey="y" dot={false}  data={this.state.amplitudeGeneratedPoints} stroke={this.amplitudeGraphColour()} />
+                            <Scatter dataKey="y" fill={this.amplitudeGraphColour()} data={this.state.amplitudeUserPoints} />
                             <XAxis type="number" dataKey="x" domain={[0, this.state.maxX]} interval={0} tickCount={this.state.maxX + 1} height={this.axisLength} allowDataOverflow={true} />
                             <YAxis type="number" domain={[-this.state.maxY, this.state.maxY]} interval={0} ticks={[-this.state.maxY,0,this.state.maxY]} width={this.axisLength}  allowDataOverflow={true} />
                             <Tooltip />
