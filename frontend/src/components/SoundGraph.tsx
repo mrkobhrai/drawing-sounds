@@ -181,8 +181,10 @@ class SoundGraph extends React.Component<Props, State> {
                 <div className="graphContainer">
                     <div style={{margin: "0 0 0 17.5vw"}}>
                         <ComposedChart width={this.width} height={this.height} onClick={this.handleGraphClick} >
-                            <Line type="monotone" dataKey="y" dot={false}  data={this.state.soundGeneratedPoints} color="red" />
-                            <Scatter dataKey="y" fill="red" data={this.state.soundUserPoints} />
+                            <Line dataKey="y" dot={false}  data={this.state.soundGeneratedPoints} stroke="blue" />
+                            <Scatter dataKey="y" fill="blue" data={this.state.soundUserPoints} />
+                            <Line dataKey="y" dot={false}  data={this.state.amplitudeGeneratedPoints} stroke="red" />
+                            <Scatter dataKey="y" fill="red" data={this.state.amplitudeUserPoints} />
                             <XAxis type="number" dataKey="x" domain={[0, this.state.maxX]} interval={0} tickCount={this.state.maxX + 1} height={this.axisLength} allowDataOverflow={true} />
                             <YAxis type="number" domain={[-this.state.maxY, this.state.maxY]} interval={0} ticks={[-this.state.maxY,0,this.state.maxY]} width={this.axisLength}  allowDataOverflow={true} />
                             <Tooltip />

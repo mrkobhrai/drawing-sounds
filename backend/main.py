@@ -36,8 +36,6 @@ def handleRequest(request_body, n_datapoints=1000):
        trained_params = None
     
     points_gp = sound_generator.sample_from_posterior((0, 5))
-    print(points_gp)
-    print(trained_params)
 
     response = {'dataTag': request_body['dataTag']}
     response["data"] = points_gp.tolist()
