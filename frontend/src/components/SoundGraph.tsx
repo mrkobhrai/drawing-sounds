@@ -15,8 +15,10 @@ interface Props {
 }
 
 interface State {
-    userPoints: { x: number; y: number; }[]
-    generatedPoints: { x: number; y: number; }[]
+    soundUserPoints: { x: number; y: number; }[]
+    soundGeneratedPoints: { x: number; y: number; }[]
+    amplitudeUserPoints: { x: number; y: number; }[]
+    amplitudeGeneratedPoints: { x: number; y: number; }[]
     kernel: Kernel,
     params: Map<string, number>,
     lengthScale: number,
@@ -32,14 +34,17 @@ class SoundGraph extends React.Component<Props, State> {
     dataTag = 0
 
     state: State = {
-        userPoints: [],
-        generatedPoints: [],
+        soundUserPoints: [],
+        soundGeneratedPoints: [],
+        amplitudeUserPoints: [],
+        amplitudeGeneratedPoints: [],
         kernel: exponentiatedQuadraticKernel,
         params: new Map(),
         lengthScale: 1,
         maxX: 5,
         maxY: 10,
         soundGenerator: new SoundGenerator(),
+        
     }
 
 
@@ -52,7 +57,7 @@ class SoundGraph extends React.Component<Props, State> {
             this.dataTag += 1;
             const x = this.calcXFromXCoord(xCoord);
             const y = this.calcYFromYCoord(yCoord);
-            this.state.userPoints.push({x, y});
+            this.state.soundUserPoints.push({x, y});
             this.onPlot();
             this.setState({});
         }
@@ -73,7 +78,7 @@ class SoundGraph extends React.Component<Props, State> {
     calcYFromYCoord = (yCoord: number) => this.state.maxY - (yCoord / (this.height - this.axisLength) * this.state.maxY * 2);
 
     getUserPoints: () => number[][] = () => {
-        return this.state.userPoints.map(point => [point.x, point.y])
+        return this.state.soundUserPoints.map(point => [point.x, point.y])
     }
 
     onPlot = async (optimiseParams = false) => {
@@ -101,14 +106,14 @@ class SoundGraph extends React.Component<Props, State> {
         // Generate the sound
         this.soundGenerator().generateSound(structuredGeneratedData);
         // Update the generated points state
-        this.state.generatedPoints = structuredGeneratedData;
+        this.state.soundGeneratedPoints = structuredGeneratedData;
         // Force a component rerender by updating the state
         this.setState({});
     }
 
     resetPoints = () => {
-        this.state.userPoints.splice(0, this.state.userPoints.length)
-        this.state.generatedPoints.splice(0, this.state.generatedPoints.length)
+        this.state.soundUserPoints.splice(0, this.state.soundUserPoints.length)
+        this.state.soundGeneratedPoints.splice(0, this.state.soundGeneratedPoints.length)
         this.state.params.clear()
         this.soundGenerator().resetSound();
         this.setState({})
@@ -176,8 +181,8 @@ class SoundGraph extends React.Component<Props, State> {
                 <div className="graphContainer">
                     <div style={{margin: "0 0 0 17.5vw"}}>
                         <ComposedChart width={this.width} height={this.height} onClick={this.handleGraphClick} >
-                            <Line type="monotone" dataKey="y" dot={false}  data={this.state.generatedPoints} />
-                            <Scatter dataKey="y" fill="red" data={this.state.userPoints} />
+                            <Line type="monotone" dataKey="y" dot={false}  data={this.state.soundGeneratedPoints} color="red" />
+                            <Scatter dataKey="y" fill="red" data={this.state.soundUserPoints} />
                             <XAxis type="number" dataKey="x" domain={[0, this.state.maxX]} interval={0} tickCount={this.state.maxX + 1} height={this.axisLength} allowDataOverflow={true} />
                             <YAxis type="number" domain={[-this.state.maxY, this.state.maxY]} interval={0} ticks={[-this.state.maxY,0,this.state.maxY]} width={this.axisLength}  allowDataOverflow={true} />
                             <Tooltip />
