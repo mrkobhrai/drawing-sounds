@@ -2,6 +2,7 @@ class SoundGenerator {
     audioSource: AudioBufferSourceNode | undefined;
     audioContext: AudioContext | undefined;
     audioBuffer: AudioBuffer | undefined;
+    gainNode: GainNode | undefined;
     started: boolean
 
     constructor () {
@@ -10,7 +11,6 @@ class SoundGenerator {
 
     play = () => {
         if (typeof this.audioContext !== 'undefined') {
-            // TODO should not call start if already running
             this.audioContext?.resume();
             this.started = true;
         }
@@ -22,16 +22,40 @@ class SoundGenerator {
     }
 
     resetSound = () => {
-        this.pause();
         this.audioSource?.disconnect();
         this.audioContext?.close();
         this.audioContext = undefined;
     }
 
     generateSound = (soundPoints: {x: number, y: number}[], amplitudePoints: {x: number, y: number}[]) => {
-        const sampleRate = 44100;
+        const SOUND_LENGTH = 5;
+        soundPoints = soundPoints.concat(soundPoints)
+        // Remove need to repeat array here
+        const sampleRate = soundPoints.length * 2;
+        if(sampleRate < 3000) {
+            console.log(sampleRate);
+            return;
+        }
         const audioContext = new AudioContext({sampleRate});
-        const waveArray  = new Float32Array(soundPoints.map((point) => point.y));
+        const maxSize: any = Math.max(soundPoints.length, amplitudePoints.length);
+
+        if(Math.min(soundPoints.length, amplitudePoints.length) === 0) {
+            console.log('No amp or sound data');
+            return;
+        }
+
+        const soundSampling = maxSize / soundPoints.length
+        const ampSampling = maxSize / amplitudePoints.length;
+        const data = [];
+        for(let j = 0; j < SOUND_LENGTH; j++) {
+            for(let i = 0; i < maxSize; i++) {
+                const soundVal = soundPoints[Math.trunc(i / soundSampling)].y;
+                const ampMultiplier = (amplitudePoints[Math.trunc(i / ampSampling / SOUND_LENGTH)].y + 10);
+                data.push(soundVal * ampMultiplier)
+            }
+        }
+        console.log(maxSize, data.length)
+        const waveArray  = new Float32Array(data);
         this.audioBuffer = audioContext.createBuffer(1, waveArray.length, sampleRate);
         this.audioBuffer.copyToChannel(waveArray, 0);
         this.resetSound();
@@ -42,6 +66,7 @@ class SoundGenerator {
         this.audioSource = source;
         this.audioContext = audioContext;
         this.audioSource.start();
+        console.log(this.started);
         if(this.started) {
             this.play();
         } else {
