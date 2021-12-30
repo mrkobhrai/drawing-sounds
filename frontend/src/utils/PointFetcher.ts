@@ -38,7 +38,6 @@ class PointFetcher {
         const postBody = {
             points: body.points,
             kernel: body.kernel,
-            isAM: body.isAM,
             ...Object.fromEntries(body.params),
             optimiseParams: body.optimiseParams,
             dataTag,
