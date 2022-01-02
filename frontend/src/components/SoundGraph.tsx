@@ -151,7 +151,7 @@ class SoundGraph extends React.Component<Props, State> {
             <label className="paramLabel">
                 <Dropdown keyVals={new Map(kernels.map(kernel => [kernel.label, kernel.name]))} selectedValue={this.state.kernel.name} onChange={(e) => {
                     this.setState({kernel: kernels.find(kernel => kernel.name === e.target.value)!}, () => {
-                        this.onPlot()
+                        this.onPlot(this.isSoundMode())
                     })
                 }}/>
             </label>
@@ -163,11 +163,11 @@ class SoundGraph extends React.Component<Props, State> {
                     this.state.params.set(param.name, parseFloat(e.target.value))
                     this.setState({})
                 }} onMouseUp={() => {
-                    this.onPlot()
+                    this.onPlot(this.isSoundMode())
                     this.setState({})
                 }}/>
             })}
-            <Button label="Optimise Parameters" onChange={() => this.onPlot(true)}/>
+            <Button label="Optimise Parameters" onChange={() => this.onPlot(this.isSoundMode(), true)}/>
         </td>
     }
 
@@ -179,7 +179,7 @@ class SoundGraph extends React.Component<Props, State> {
                         <Dropdown keyVals={new Map([['Sound Mode', 'sound'], ['Amplitude Mode', 'amplitude']])} selectedValue={this.isSoundMode() ? 'sound':'amplitude'} onChange={(e)=>this.setState({isSoundMode: e.target.value === 'sound'})}/>
                     </td>
                     <td className="params">
-                        <Button label="Resample Graph" onChange={() => this.onPlot()}/>
+                        <Button label="Resample Graph" onChange={() => this.onPlot(this.isSoundMode())}/>
                     </td>
                     <td className="params">
                         <Button label="Reset Graph" onChange={this.resetPoints}/>
