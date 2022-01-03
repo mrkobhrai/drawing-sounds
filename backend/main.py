@@ -1,4 +1,5 @@
 import json
+import os
 
 from flask import Flask, request
 from flask_cors import CORS
@@ -7,6 +8,8 @@ from flask_sock import Sock
 from model import GPSoundGenerator
 
 
+os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
+
 app = Flask(__name__)
 sock = Sock(app)
 cors = CORS(app, resources={r"/": {"origins": "http://localhost:3000"}})
@@ -14,29 +17,32 @@ cors = CORS(app, resources={r"/": {"origins": "http://localhost:3000"}})
 
 # CONSTANTS
 SAMPLE_RATE = 44000 # 44kHz set as a default for a good sound quality
+SOUND_DURATION = 5
 
 
 sound_generator = GPSoundGenerator(sample_rate=SAMPLE_RATE)
 
 
-def handleRequest(request_body, n_datapoints=SAMPLE_RATE):
+def handleRequest(request_body, sample_rate=SAMPLE_RATE):
     points = request_body['points']
     points = [(point[0], point[1]) for point in points]
     xs, ys = map(list, zip(*points))
+    print(xs)
+    print(ys)
 
     # Set kernel and its parameters
     kernel_name = request_body['kernel']
     if kernel_name is None:
         kernel_name = 'exponentiated_quadratic_kernel'
     params = request_body
-    sound_generator.update_train_data(xs, ys, params, kernel_name, n_datapoints)
+    sound_generator.update_train_data(xs, ys, params, kernel_name, sample_rate)
 
     if request_body['optimiseParams']:
        trained_params = sound_generator.fit()    
     else:
        trained_params = None
     
-    points_gp = sound_generator.sample_from_posterior((0, 5))
+    points_gp = sound_generator.sample_from_posterior(SOUND_DURATION)
     print(points_gp)
     print(trained_params)
 

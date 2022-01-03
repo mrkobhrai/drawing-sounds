@@ -7,7 +7,7 @@ from gpflow_sampling.sampling.updates import cg as cg_update
 
 
 class GPSoundGenerator:
-    def __init__(self, sample_rate=44000):
+    def __init__(self, sample_rate=44100):
         self.sample_rate = sample_rate
         
         self.train_x = np.array([])
@@ -16,8 +16,8 @@ class GPSoundGenerator:
 
     def update_train_data(self, train_x, train_y, params, kernel_name,
                           sample_rate):
-        self.train_x = train_x.reshape(-1, 1)
-        self.train_y = train_y.reshape(-1, 1)
+        self.train_x = tf.convert_to_tensor(np.array(train_x).reshape(-1, 1))
+        self.train_y = tf.convert_to_tensor(np.array(train_y).reshape(-1, 1))
         self.sample_rate = sample_rate
         
         #kernel = self.get_kernel(kernel_name, params)
@@ -30,7 +30,7 @@ class GPSoundGenerator:
             noise_variance=2e-6
             )
 
-        paths = self.model.generate_paths(num_samples=1, num_bases=512)
+        paths = self.model.generate_paths(num_samples=32, num_bases=512)
         print(paths)
         self.model.set_paths(paths)
 
@@ -51,9 +51,9 @@ class GPSoundGenerator:
 
         with self.model.temporary_paths(
             num_samples=1, num_bases=512, update_rule=cg_update):
-            f_plot = tf.squeeze(self.model.predict_f_samples(test_x))
-
-            return f_plot.numpy()
+            f_plot = self.model.predict_f_samples(test_x)
+ 
+            return f_plot.numpy().reshape(-1, 1)
 
     def get_kernel(self, kernel_name, params):
         
