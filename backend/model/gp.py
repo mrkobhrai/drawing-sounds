@@ -20,9 +20,7 @@ class GPSoundGenerator:
         self.train_y = tf.convert_to_tensor(np.array(train_y).reshape(-1, 1))
         self.sample_rate = sample_rate
         
-        #kernel = self.get_kernel(kernel_name, params)
-        self.kernel_name = 'exponentiated_quadratic_kernel' 
-        kernel = kernels.SquaredExponential()         
+        kernel = self.get_kernel(kernel_name, params)
 
         self.model = PathwiseGPR(
             data=(self.train_x, self.train_y),
