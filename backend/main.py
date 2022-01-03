@@ -3,22 +3,23 @@ import json
 from flask import Flask, request
 from flask_cors import CORS
 from flask_sock import Sock
-import torch
 
-from model import GaussianProcess, GPSoundGenerator
+from model import GPSoundGenerator
 
-
-torch.set_num_threads(1)
 
 app = Flask(__name__)
 sock = Sock(app)
 cors = CORS(app, resources={r"/": {"origins": "http://localhost:3000"}})
 
 
-sound_generator = GPSoundGenerator(sample_rate=1000)
+# CONSTANTS
+SAMPLE_RATE = 44000 # 44kHz set as a default for a good sound quality
 
 
-def handleRequest(request_body, n_datapoints=1000):
+sound_generator = GPSoundGenerator(sample_rate=SAMPLE_RATE)
+
+
+def handleRequest(request_body, n_datapoints=SAMPLE_RATE):
     points = request_body['points']
     points = [(point[0], point[1]) for point in points]
     xs, ys = map(list, zip(*points))
