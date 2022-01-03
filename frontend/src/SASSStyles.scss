@@ -10,6 +10,7 @@ select, button {
 }
 
 div.graphContainer {
+  display: table;
   text-align: center;
   align-items: center;
   justify-content: left;
@@ -85,4 +86,8 @@ div.socketStatus {
   text-align: center;
   font-size: larger;
   font-weight: bolder;
+}
+
+.instructions {
+  width: 500px
 }
