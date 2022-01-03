@@ -19,13 +19,21 @@ interface State {
     soundUserPoints: { x: number; y: number; }[]
     soundGeneratedPoints: { x: number; y: number; }[]
     amplitudeUserPoints: { x: number; y: number; }[]
-    amplitudeGeneratedPoints: { x: number; y: number; }[]
+    amplitudeGeneratedPoints: { x: number; y: number; }[],
     isSoundMode: boolean,
-    kernel: Kernel,
-    params: Map<string, number>,
-    lengthScale: number,
     maxX: number,
-    maxY: number,
+    sound : {
+        kernel: Kernel,
+        params: Map<string, number>,
+        lengthScale: number,
+        maxY: number,
+    },
+    amplitude : {
+        kernel: Kernel,
+        params: Map<string, number>,
+        lengthScale: number,
+        maxY: number,
+    }
     soundGenerator: SoundGenerator;
 }
 
@@ -42,11 +50,19 @@ class SoundGraph extends React.Component<Props, State> {
         amplitudeUserPoints: [],
         amplitudeGeneratedPoints: [],
         isSoundMode: true, // true when in sound mode, false when in amp modulation mode
-        kernel: exponentiatedQuadraticKernel,
-        params: new Map(),
-        lengthScale: 1,
         maxX: 1,
-        maxY: 10,
+        sound: {
+            kernel: exponentiatedQuadraticKernel,
+            params: new Map(),
+            lengthScale: 1,
+            maxY: 10,
+        },
+        amplitude: {
+            kernel: exponentiatedQuadraticKernel,
+            params: new Map(),
+            lengthScale: 1,
+            maxY: 1,
+        },
         soundGenerator: new SoundGenerator(),   
     }
 
@@ -71,21 +87,37 @@ class SoundGraph extends React.Component<Props, State> {
         }
     };
 
+    setGraphState = (key: any, value: any, callback: (undefined | (()=>void))=undefined) => {
+        var data: any = null;
+        if (this.isSoundMode()) {
+            data = {...this.state.sound};
+            data[key] = value;
+            data = {sound: {...data}}
+        } else {
+            data = {...this.state.amplitude};
+            data[key] = value;
+            data = {amplitude: {...data}}
+        }
+        this.setState(data, callback);
+    }
+
+    getGraphState = () => this.isSoundMode() ? this.state.sound : this.state.amplitude;
+
     handleXAxisSet = (e:any) => {
-        this.setState({maxX: parseInt(e.target.value)});
+        this.setGraphState('maxX', parseInt(e.target.value))
         this.onPlot(true);
         this.onPlot(false);
     }
 
     handleLengthscaleSet = (e:any) => {
-        this.setState({lengthScale: parseInt(e.target.value)});
+        this.setGraphState('lengthScale', parseInt(e.target.value));
         this.onPlot(true);
         this.onPlot(false);
     }
 
-    calcXFromXCoord = (xCoord: number) => (xCoord - this.axisLength) / (this.width - this.axisLength) * this.state.maxX;
+    calcXFromXCoord = (xCoord: number) => (xCoord - this.axisLength) / (this.width - this.axisLength) *  this.state.maxX;
 
-    calcYFromYCoord = (yCoord: number) => this.state.maxY - (yCoord / (this.height - this.axisLength) * this.state.maxY * 2);
+    calcYFromYCoord = (yCoord: number) => this.getGraphState().maxY - (yCoord / (this.height - this.axisLength) *  this.getGraphState().maxY * 2);
 
     getUserSoundPoints: () => number[][] = () => {
         return this.state.soundUserPoints.map(point => [point.x, point.y])
@@ -103,7 +135,7 @@ class SoundGraph extends React.Component<Props, State> {
         // Get the correct data tag
         const tag = this.getTag(soundMode)
         // Get the gaussian data
-        this.props.pointFetcher.sendData({ points: userData, kernel: this.state.kernel.name, params: this.state.params, optimiseParams}, tag, soundMode);
+        this.props.pointFetcher.sendData({ points: userData, kernel:  this.getGraphState().kernel.name, params:  this.getGraphState().params, optimiseParams}, tag, soundMode);
     }
 
     onData = (data: any) => {
@@ -112,14 +144,14 @@ class SoundGraph extends React.Component<Props, State> {
         if(generatedData['dataTag'] === this.getTag(soundMode)){
             this.updateGeneratedPoints(generatedData.data, soundMode);
             generatedData.params?.forEach((keyValue) => {
-                this.state.params.set(keyValue.name, keyValue.value)
+                this.getGraphState().params.set(keyValue.name, keyValue.value)
             })
         }
     }
 
     generateDistributedDataFromPoints = (points: number[]) => {
         // Calculate the distribution for the number of data points and X axis
-        const xDistribution = this.state.maxX / points.length;
+        const xDistribution =  this.state.maxX / points.length;
         return points.map((y, i) => ({x: xDistribution * i, y: y}));
     }
 
@@ -134,7 +166,7 @@ class SoundGraph extends React.Component<Props, State> {
     resetPoints = () => {
         this.state.soundUserPoints.splice(0, this.state.soundUserPoints.length)
         this.state.soundGeneratedPoints.splice(0, this.state.soundGeneratedPoints.length)
-        this.state.params.clear()
+        this.getGraphState().params.clear()
         this.soundGenerator().resetSound();
         this.setState({})
     }
@@ -150,18 +182,18 @@ class SoundGraph extends React.Component<Props, State> {
     generateKernelDropdownAndParameters = () => {
         return <td className="params">
             <label className="paramLabel">
-                <Dropdown keyVals={new Map(kernels.map(kernel => [kernel.label, kernel.name]))} selectedValue={this.state.kernel.name} onChange={(e) => {
-                    this.setState({kernel: kernels.find(kernel => kernel.name === e.target.value)!}, () => {
+                <Dropdown keyVals={new Map(kernels.map(kernel => [kernel.label, kernel.name]))} selectedValue={this.getGraphState().kernel.name} onChange={(e) => {
+                    this.setGraphState('kernel', kernels.find(kernel => kernel.name === e.target.value)!, () => {
                         this.onPlot(this.isSoundMode())
                     })
                 }}/>
             </label>
-            {this.state.kernel.parameters.map(param => {
-                if (!this.state.params.has(param.name)) {
-                    this.state.params.set(param.name, param.default)
+            {this.getGraphState().kernel.parameters.map(param => {
+                if (!this.getGraphState().params.has(param.name)) {
+                    this.getGraphState().params.set(param.name, param.default)
                 }
-                return <Slider key={param.name} name={param.label} min={param.min} max={param.max} step={0.01} value={this.state.params.get(param.name)!} onChange={(e) => {
-                    this.state.params.set(param.name, parseFloat(e.target.value))
+                return <Slider key={param.name} name={param.label} min={param.min} max={param.max} step={0.01} value={this.getGraphState().params.get(param.name)!} onChange={(e) => {
+                    this.getGraphState().params.set(param.name, parseFloat(e.target.value))
                     this.setState({})
                 }} onMouseUp={() => {
                     this.onPlot(this.isSoundMode())
@@ -231,12 +263,13 @@ class SoundGraph extends React.Component<Props, State> {
                     <div style={{margin: "0 0 0 17.5vw"}}>
                         <ComposedChart width={this.width} height={this.height} onClick={this.handleGraphClick} >
                             <CartesianGrid strokeDasharray={"3 3"}/>
-                            <Line dataKey="y" dot={false}  data={this.state.soundGeneratedPoints} stroke={this.soundGraphColour()} />
-                            <Scatter dataKey="y" fill={this.soundGraphColour()} data={this.state.soundUserPoints} />
-                            <Line dataKey="y" dot={false}  data={this.state.amplitudeGeneratedPoints} stroke={this.amplitudeGraphColour()} />
-                            <Scatter dataKey="y" fill={this.amplitudeGraphColour()} data={this.state.amplitudeUserPoints} />
-                            <XAxis tickLine={false} axisLine={false} type="number" dataKey="x" domain={[0, this.state.maxX]} interval={0} tickCount={this.state.maxX + 1} height={this.axisLength} allowDataOverflow={true} />
-                            <YAxis tickLine={false} axisLine={false} type="number" domain={[-this.state.maxY, this.state.maxY]} interval={0} ticks={[-this.state.maxY,0,this.state.maxY]} width={this.axisLength}  allowDataOverflow={true} />
+                            <Line yAxisId="sound" dataKey="y" dot={false}  data={this.state.soundGeneratedPoints} stroke={this.soundGraphColour()} />
+                            <Scatter yAxisId="sound" dataKey="y" fill={this.soundGraphColour()} data={this.state.soundUserPoints} />
+                            <Line yAxisId="amp" dataKey="y" dot={false}  data={this.state.amplitudeGeneratedPoints} stroke={this.amplitudeGraphColour()} />
+                            <Scatter yAxisId="amp" dataKey="y" fill={this.amplitudeGraphColour()} data={this.state.amplitudeUserPoints} />
+                            <XAxis tickLine={false} axisLine={true} type="number" dataKey="x" domain={[0, this.state.maxX]} interval={0} tickCount={this.state.maxX + 1} height={this.axisLength} allowDataOverflow={true} />
+                            <YAxis yAxisId="sound" orientation='left' tickLine={false} axisLine={this.isSoundMode()} type="number" domain={[-this.state.sound.maxY, this.state.sound.maxY]} interval={0} ticks={[-this.state.sound.maxY,0,this.state.sound.maxY]} width={this.axisLength}  allowDataOverflow={true} />
+                            <YAxis yAxisId="amp" orientation='right' tickLine={false} axisLine={this.isAmplitudeMode()} type="number" domain={[-this.state.amplitude.maxY, this.state.amplitude.maxY]} interval={0} ticks={[-this.state.amplitude.maxY,0,this.state.amplitude.maxY]} width={this.axisLength}  allowDataOverflow={true} />
                             <Tooltip />
                         </ComposedChart>
                     </div>
