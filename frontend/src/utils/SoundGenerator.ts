@@ -28,19 +28,12 @@ class SoundGenerator {
     }
 
     generateSound = (soundPoints: {x: number, y: number}[], amplitudePoints: {x: number, y: number}[]) => {
-        const SOUND_LENGTH = 5;
-        soundPoints = soundPoints.concat(soundPoints)
-        // Remove need to repeat array here
-        const sampleRate = soundPoints.length * 2;
-        if(sampleRate < 3000) {
-            console.log(sampleRate);
-            return;
-        }
+        const SOUND_LENGTH = 1;
+        const sampleRate = 44000;
         const audioContext = new AudioContext({sampleRate});
         const maxSize: any = Math.max(soundPoints.length, amplitudePoints.length);
 
         if(Math.min(soundPoints.length, amplitudePoints.length) === 0) {
-            console.log('No amp or sound data');
             return;
         }
 

@@ -17,7 +17,7 @@ cors = CORS(app, resources={r"/": {"origins": "http://localhost:3000"}})
 
 # CONSTANTS
 SAMPLE_RATE = 44000 # 44kHz set as a default for a good sound quality
-SOUND_DURATION = 5
+SOUND_DURATION = 1
 
 
 sound_generator = GPSoundGenerator(sample_rate=SAMPLE_RATE)
@@ -27,8 +27,6 @@ def handleRequest(request_body, sample_rate=SAMPLE_RATE):
     points = request_body['points']
     points = [(point[0], point[1]) for point in points]
     xs, ys = map(list, zip(*points))
-    print(xs)
-    print(ys)
 
     # Set kernel and its parameters
     kernel_name = request_body['kernel']
@@ -43,9 +41,6 @@ def handleRequest(request_body, sample_rate=SAMPLE_RATE):
        trained_params = None
     
     points_gp = sound_generator.sample_from_posterior(SOUND_DURATION)
-    print(points_gp)
-    print(trained_params)
-
     response = {
        'dataTag': request_body['dataTag'],
        'soundMode': request_body['soundMode'],    
