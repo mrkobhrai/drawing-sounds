@@ -1,4 +1,4 @@
-from .gp import GaussianProcess, GPSoundGenerator
+from .gp import GPSoundGenerator
 
 
-__all__ = [GaussianProcess, GPSoundGenerator]
+__all__ = [GPSoundGenerator]
