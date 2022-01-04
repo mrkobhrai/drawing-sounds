@@ -31,7 +31,7 @@ class SoundGenerator {
         if(Math.min(soundPoints.length, amplitudePoints.length) === 0) {
             return;
         }
-        const sampleRate = soundPoints.length;
+        const sampleRate = soundPoints.length / duration;
         const audioContext = new AudioContext({sampleRate});
         const gainNode = audioContext.createGain();
         const maxSize: any = Math.max(soundPoints.length, amplitudePoints.length);
