@@ -27,23 +27,23 @@ class SoundGenerator {
         this.audioContext = undefined;
     }
 
-    generateSound = (soundPoints: {x: number, y: number}[], amplitudePoints: {x: number, y: number}[]) => {
-        const SOUND_LENGTH = 1;
-        const sampleRate = soundPoints.length;
-        const audioContext = new AudioContext({sampleRate});
-        const maxSize: any = Math.max(soundPoints.length, amplitudePoints.length);
-
+    generateSound = (soundPoints: {x: number, y: number}[], amplitudePoints: {x: number, y: number}[], duration=1) => {
         if(Math.min(soundPoints.length, amplitudePoints.length) === 0) {
             return;
         }
+        const sampleRate = soundPoints.length;
+        const audioContext = new AudioContext({sampleRate});
+        const gainNode = audioContext.createGain();
+        const maxSize: any = Math.max(soundPoints.length, amplitudePoints.length);
 
         const soundSampling = maxSize / soundPoints.length
         const ampSampling = maxSize / amplitudePoints.length;
         const data = [];
-        for(let j = 0; j < SOUND_LENGTH; j++) {
+        for(let j = 0; j < duration; j++) {
             for(let i = 0; i < maxSize; i++) {
                 const soundVal = soundPoints[Math.trunc(i / soundSampling)].y;
-                const ampMultiplier = (amplitudePoints[Math.trunc(i / ampSampling / SOUND_LENGTH)].y);
+                const amp = (amplitudePoints[Math.trunc(i / ampSampling / duration)].y);
+                gainNode.gain.linearRampToValueAtTime(amp, duration * i / amplitudePoints.length)
                 data.push(soundVal)
             }
         }
@@ -54,7 +54,10 @@ class SoundGenerator {
         this.resetSound();
         const source = audioContext.createBufferSource();
         source.loop = true;
-        source.connect(audioContext.destination);
+        source.loopStart = 0;
+        source.loopEnd = duration;
+        source.connect(gainNode);
+        gainNode.connect(audioContext.destination)
         source.buffer = this.audioBuffer;
         this.audioSource = source;
         this.audioContext = audioContext;
