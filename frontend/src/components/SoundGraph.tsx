@@ -47,9 +47,9 @@ class SoundGraph extends React.Component<Props, State> {
     amplitudeDatatag = 0
 
     state: State = {
-        soundUserPoints: [],
+        soundUserPoints: [{x:0, y:0}, {x:1, y:0}],
         soundGeneratedPoints: [],
-        amplitudeUserPoints: [],
+        amplitudeUserPoints: [{x:0, y:1}, {x:1, y:1}],
         amplitudeGeneratedPoints: [],
         isSoundMode: true, // true when in sound mode, false when in amp modulation mode
         maxX: 1,

@@ -41,7 +41,7 @@ class PointFetcher {
             ...Object.fromEntries(body.params),
             optimiseParams: body.optimiseParams,
             dataTag,
-            batches: [5500, 11000, 44000],
+            batches: [4000],
             soundMode,
         };
 

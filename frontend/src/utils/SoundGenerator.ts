@@ -29,7 +29,7 @@ class SoundGenerator {
 
     generateSound = (soundPoints: {x: number, y: number}[], amplitudePoints: {x: number, y: number}[]) => {
         const SOUND_LENGTH = 1;
-        const sampleRate = 44000;
+        const sampleRate = 4000;
         const audioContext = new AudioContext({sampleRate});
         const maxSize: any = Math.max(soundPoints.length, amplitudePoints.length);
 
@@ -44,7 +44,7 @@ class SoundGenerator {
             for(let i = 0; i < maxSize; i++) {
                 const soundVal = soundPoints[Math.trunc(i / soundSampling)].y;
                 const ampMultiplier = (amplitudePoints[Math.trunc(i / ampSampling / SOUND_LENGTH)].y);
-                data.push(soundVal * ampMultiplier)
+                data.push(soundVal)
             }
         }
         console.log(maxSize, data.length)
@@ -58,7 +58,7 @@ class SoundGenerator {
         source.buffer = this.audioBuffer;
         this.audioSource = source;
         this.audioContext = audioContext;
-        this.audioSource.start();
+        this.audioSource.start(0);
         console.log(this.started);
         if(this.started) {
             this.play();
