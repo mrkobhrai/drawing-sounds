@@ -164,8 +164,13 @@ class SoundGraph extends React.Component<Props, State> {
     }
 
     resetPoints = () => {
-        this.state.soundUserPoints.splice(0, this.state.soundUserPoints.length)
-        this.state.soundGeneratedPoints.splice(0, this.state.soundGeneratedPoints.length)
+        if (this.isSoundMode()) {
+            this.state.soundUserPoints.splice(0, this.state.soundUserPoints.length)
+            this.state.soundGeneratedPoints.splice(0, this.state.soundGeneratedPoints.length)
+        } else {
+            this.state.amplitudeUserPoints.splice(0, this.state.amplitudeUserPoints.length)
+            this.state.amplitudeGeneratedPoints.splice(0, this.state.amplitudeGeneratedPoints.length)
+        }
         this.getGraphState().params.clear()
         this.soundGenerator().resetSound();
         this.setState({})
