@@ -27,12 +27,14 @@ interface State {
         params: Map<string, number>,
         lengthScale: number,
         maxY: number,
+        minY: number,
     },
     amplitude : {
         kernel: Kernel,
         params: Map<string, number>,
         lengthScale: number,
         maxY: number,
+        minY: number,
     }
     soundGenerator: SoundGenerator;
 }
@@ -56,12 +58,14 @@ class SoundGraph extends React.Component<Props, State> {
             params: new Map(),
             lengthScale: 1,
             maxY: 1,
+            minY: -1,
         },
         amplitude: {
             kernel: exponentiatedQuadraticKernel,
             params: new Map(),
             lengthScale: 1,
             maxY: 1,
+            minY: 0,
         },
         soundGenerator: new SoundGenerator(),   
     }
@@ -74,6 +78,7 @@ class SoundGraph extends React.Component<Props, State> {
             const xCoord = e.chartX;
             const yCoord = e.chartY;
             const x = this.calcXFromXCoord(xCoord);
+            console.log((xCoord - this.axisLength) / (this.width - this.axisLength));
             const y = this.calcYFromYCoord(yCoord);
             if (this.isSoundMode()) {
                 this.soundDatatag += 1;
@@ -115,9 +120,9 @@ class SoundGraph extends React.Component<Props, State> {
         this.onPlot(false);
     }
 
-    calcXFromXCoord = (xCoord: number) => (xCoord - this.axisLength) / (this.width - this.axisLength) *  this.state.maxX;
+    calcXFromXCoord = (xCoord: number) => (xCoord - this.axisLength) / (this.width - 2 * this.axisLength) *  this.state.maxX;
 
-    calcYFromYCoord = (yCoord: number) => this.getGraphState().maxY - (yCoord / (this.height - this.axisLength) *  this.getGraphState().maxY * 2);
+    calcYFromYCoord = (yCoord: number) => this.getGraphState().maxY - (yCoord / (this.height - this.axisLength) *  (this.getGraphState().maxY - this.getGraphState().minY));
 
     getUserSoundPoints: () => number[][] = () => {
         return this.state.soundUserPoints.map(point => [point.x, point.y])
@@ -273,8 +278,8 @@ class SoundGraph extends React.Component<Props, State> {
                             <Line yAxisId="amp" dataKey="y" dot={false}  data={this.state.amplitudeGeneratedPoints} stroke={this.amplitudeGraphColour()} />
                             <Scatter yAxisId="amp" dataKey="y" fill={this.amplitudeGraphColour()} data={this.state.amplitudeUserPoints} />
                             <XAxis tickLine={false} axisLine={true} type="number" dataKey="x" domain={[0, this.state.maxX]} interval={0} tickCount={this.state.maxX + 1} height={this.axisLength} allowDataOverflow={true} />
-                            <YAxis yAxisId="sound" orientation='left' tickLine={false} axisLine={this.isSoundMode()} type="number" domain={[-this.state.sound.maxY, this.state.sound.maxY]} interval={0} ticks={[-this.state.sound.maxY,0,this.state.sound.maxY]} width={this.axisLength}  allowDataOverflow={true} />
-                            <YAxis yAxisId="amp" orientation='right' tickLine={false} axisLine={this.isAmplitudeMode()} type="number" domain={[-this.state.amplitude.maxY, this.state.amplitude.maxY]} interval={0} ticks={[-this.state.amplitude.maxY,0,this.state.amplitude.maxY]} width={this.axisLength}  allowDataOverflow={true} />
+                            <YAxis yAxisId="sound" orientation='left' tickLine={false} axisLine={this.isSoundMode()} type="number" domain={[this.state.sound.minY, this.state.sound.maxY]} interval={0} ticks={[this.state.sound.minY,0,this.state.sound.maxY]} width={this.axisLength}  allowDataOverflow={true} />
+                            <YAxis yAxisId="amp" orientation='right' tickLine={false} axisLine={this.isAmplitudeMode()} type="number" domain={[this.state.amplitude.minY, this.state.amplitude.maxY]} interval={0} ticks={[this.state.amplitude.minY,0,this.state.amplitude.maxY]} width={this.axisLength}  allowDataOverflow={true} />
                             <Tooltip />
                         </ComposedChart>
                     </div>
