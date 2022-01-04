@@ -29,7 +29,7 @@ class SoundGenerator {
 
     generateSound = (soundPoints: {x: number, y: number}[], amplitudePoints: {x: number, y: number}[]) => {
         const SOUND_LENGTH = 1;
-        const sampleRate = 4000;
+        const sampleRate = soundPoints.length;
         const audioContext = new AudioContext({sampleRate});
         const maxSize: any = Math.max(soundPoints.length, amplitudePoints.length);
 
