@@ -43,7 +43,7 @@ class SoundGenerator {
         for(let j = 0; j < SOUND_LENGTH; j++) {
             for(let i = 0; i < maxSize; i++) {
                 const soundVal = soundPoints[Math.trunc(i / soundSampling)].y;
-                const ampMultiplier = (amplitudePoints[Math.trunc(i / ampSampling / SOUND_LENGTH)].y + 10);
+                const ampMultiplier = (amplitudePoints[Math.trunc(i / ampSampling / SOUND_LENGTH)].y);
                 data.push(soundVal * ampMultiplier)
             }
         }

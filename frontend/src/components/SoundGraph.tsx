@@ -55,7 +55,7 @@ class SoundGraph extends React.Component<Props, State> {
             kernel: exponentiatedQuadraticKernel,
             params: new Map(),
             lengthScale: 1,
-            maxY: 10,
+            maxY: 1,
         },
         amplitude: {
             kernel: exponentiatedQuadraticKernel,
