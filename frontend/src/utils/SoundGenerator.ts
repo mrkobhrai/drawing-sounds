@@ -61,6 +61,7 @@ class SoundGenerator {
     }
 
     downloadSound = () => {
+        //TODO make this same length as sound
         if (this.audioBuffer) {
             // Replicate the stored buffer points into a Float array
             const list = []

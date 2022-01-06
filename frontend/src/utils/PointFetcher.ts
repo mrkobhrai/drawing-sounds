@@ -31,8 +31,9 @@ class PointFetcher {
         } 
     }
 
-    sendData: (body: FetchDataBody, dataTag: number, soundMode: boolean) => void
-        = async (body: FetchDataBody, dataTag: number,  soundMode: boolean) => {
+    sendData: (body: FetchDataBody, dataTag: number, soundMode: boolean, duration: number) => void
+        = async (body: FetchDataBody, dataTag: number,  soundMode: boolean, duration: number) => {
+        const soundDuration = soundMode ? 1: duration
         const postBody = {
             points: body.points,
             kernel: body.kernel,
@@ -41,6 +42,7 @@ class PointFetcher {
             dataTag,
             batches: [700],
             soundMode,
+            soundDuration,
         };
 
         if (this.ws.readyState) {

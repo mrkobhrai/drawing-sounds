@@ -51,6 +51,7 @@ class SoundGraph extends React.Component<Props, State> {
         let generatedData: FetchRequestBody = JSON.parse(data);
         const soundMode = generatedData['soundMode'];
         if(generatedData['dataTag'] === this.getTag(soundMode)){
+            //TODO Check why optimise isn't working
             this.updateGeneratedPoints(generatedData.data, soundMode);
             generatedData.params?.forEach((keyValue) => {
                 this.getGraphState().params.set(keyValue.name, keyValue.value)
@@ -154,7 +155,7 @@ class SoundGraph extends React.Component<Props, State> {
         // Get the correct data tag
         const tag = this.getTag(soundMode)
         // Get the gaussian data
-        this.pointFetcher.sendData({ points: userData, kernel:  this.getGraphState().kernel.name, params:  this.getGraphState().params, optimiseParams}, tag, soundMode);
+        this.pointFetcher.sendData({ points: userData, kernel:  this.getGraphState().kernel.name, params:  this.getGraphState().params, optimiseParams}, tag, soundMode, this.state.amplitude.maxX);
     }
 
     generateDistributedDataFromPoints = (points: number[]) => {
@@ -258,9 +259,10 @@ class SoundGraph extends React.Component<Props, State> {
                                     </tr>
                                     <tr>
                                         <td className={"params"}>
+                                            <label>Sound Duration</label>
                                             <input type={"number"} value={this.state.amplitude.maxX} onChange={(e)=>{
                                                 this.state.amplitude.maxX = parseInt(e.target.value);
-                                                this.setState({});
+                                                this.onPlot(false);
                                                 }
                                             }/>
                                         </td>

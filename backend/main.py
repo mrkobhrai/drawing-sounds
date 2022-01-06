@@ -7,18 +7,14 @@ from flask_sock import Sock
 
 from model import GPSoundGenerator
 
-
 os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 
 app = Flask(__name__)
 sock = Sock(app)
 cors = CORS(app, resources={r"/": {"origins": "http://localhost:3000"}})
 
-
 # CONSTANTS
-SAMPLE_RATE = 44000 # 44kHz set as a default for a good sound quality
-SOUND_DURATION = 1
-
+SAMPLE_RATE = 44000  # 44kHz set as a default for a good sound quality
 
 sound_generator = GPSoundGenerator(sample_rate=SAMPLE_RATE)
 
@@ -36,15 +32,15 @@ def handleRequest(request_body, sample_rate=SAMPLE_RATE):
     sound_generator.update_train_data(xs, ys, params, kernel_name, sample_rate)
 
     if request_body['optimiseParams']:
-       trained_params = sound_generator.fit()    
+        trained_params = sound_generator.fit()
     else:
-       trained_params = None
-    
-    points_gp = sound_generator.sample_from_posterior(SOUND_DURATION)
+        trained_params = None
+    sound_duration = request_body['soundDuration']
+    points_gp = sound_generator.sample_from_posterior(sound_duration)
     response = {
-       'dataTag': request_body['dataTag'],
-       'soundMode': request_body['soundMode'],    
-   }
+        'dataTag': request_body['dataTag'],
+        'soundMode': request_body['soundMode'],
+    }
     response["data"] = points_gp.tolist()
     response["params"] = trained_params
 
@@ -53,15 +49,15 @@ def handleRequest(request_body, sample_rate=SAMPLE_RATE):
 
 @sock.route('/gaussian')
 def socket_handler(ws):
-   while True:
-      raw_data = ws.receive()
-      request_body = json.loads(raw_data)
-      batches = request_body['batches']
-      for batch in batches:
-         response = handleRequest(request_body, batch)
-         data_json = json.dumps(response)
-         ws.send(data_json)    
-      
+    while True:
+        raw_data = ws.receive()
+        request_body = json.loads(raw_data)
+        batches = request_body['batches']
+        for batch in batches:
+            response = handleRequest(request_body, batch)
+            data_json = json.dumps(response)
+            ws.send(data_json)
+
 
 @app.route('/', methods=['POST'])
 def generate_handler():
@@ -69,7 +65,7 @@ def generate_handler():
     data, updated_params = handleRequest(request_body)
     # Process input
     response = {}
-    response["data"] =[data]
+    response["data"] = [data]
     response["params"] = updated_params
 
     return response
