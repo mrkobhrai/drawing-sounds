@@ -7,6 +7,7 @@ import Button from "./Button";
 import {exponentiatedQuadraticKernel, Kernel, kernels} from "../utils/Kernel";
 import SoundGenerator from "../utils/SoundGenerator";
 import {FetchRequestBody} from "../Interfaces";
+import Collapsible from 'react-collapsible';
 
 interface Props {
     width?: number,
@@ -219,7 +220,8 @@ class SoundGraph extends React.Component<Props, State> {
     }
 
     generateTable: () => JSX.Element = () => {
-        return <table className="params">
+        return  (
+        <table className="params">
             <tbody>
                 <tr>
                     <td className={"params"} >
@@ -251,6 +253,7 @@ class SoundGraph extends React.Component<Props, State> {
                 </tr>
             </tbody>
         </table>
+        )
     }
 
     render () {
@@ -269,7 +272,9 @@ class SoundGraph extends React.Component<Props, State> {
                             <Tooltip />
                         </ComposedChart>
                     </div>
-                    {this.generateTable()}
+                    <Collapsible trigger="Options" >
+                        {this.generateTable()}
+                    </Collapsible>
                 </div>
 
             )
