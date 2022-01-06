@@ -1,6 +1,6 @@
 import React from "react";
 import {Line, XAxis, YAxis, Tooltip, ComposedChart, Scatter, CartesianGrid} from 'recharts';
-import {PointFetcher} from "../utils/PointFetcher";
+import {PointFetcher, SOCKET_CONNECTION} from "../utils/PointFetcher";
 import Slider from "./Slider";
 import Dropdown from "./Dropdown";
 import Button from "./Button";
@@ -12,7 +12,6 @@ import swal from "sweetalert";
 interface Props {
     width?: number,
     height?: number,
-    pointFetcher: PointFetcher,
 }
 
 interface State {
@@ -36,15 +35,31 @@ interface State {
         maxY: number,
         minY: number,
     }
-    soundGenerator: SoundGenerator;
+    soundGenerator: SoundGenerator,
+    socketLoading: String,
 }
 
 class SoundGraph extends React.Component<Props, State> {
-    width = this.props.width ?? 1000
-    height = this.props.height ?? 500
+    width = this.props.width ?? 1500
+    height = this.props.height ?? 800
     axisLength = 50
     soundDatatag = 0
     amplitudeDatatag = 0
+
+    onData = (data: any) => {
+        let generatedData: FetchRequestBody = JSON.parse(data);
+        const soundMode = generatedData['soundMode'];
+        if(generatedData['dataTag'] === this.getTag(soundMode)){
+            this.updateGeneratedPoints(generatedData.data, soundMode);
+            generatedData.params?.forEach((keyValue) => {
+                this.getGraphState().params.set(keyValue.name, keyValue.value)
+            })
+        }
+    }
+
+    setLoading = (value: string) => this.setState({socketLoading: value})
+
+    pointFetcher = new PointFetcher(this.onData, this.setLoading);
 
     state: State = {
         soundUserPoints: [{x:0, y:0}, {x:1, y:0}],
@@ -68,6 +83,7 @@ class SoundGraph extends React.Component<Props, State> {
             minY: 0,
         },
         soundGenerator: new SoundGenerator(),   
+        socketLoading: SOCKET_CONNECTION.CONNECTING,
     }
 
 
@@ -140,18 +156,7 @@ class SoundGraph extends React.Component<Props, State> {
         // Get the correct data tag
         const tag = this.getTag(soundMode)
         // Get the gaussian data
-        this.props.pointFetcher.sendData({ points: userData, kernel:  this.getGraphState().kernel.name, params:  this.getGraphState().params, optimiseParams}, tag, soundMode);
-    }
-
-    onData = (data: any) => {
-        let generatedData: FetchRequestBody = JSON.parse(data);
-        const soundMode = generatedData['soundMode'];
-        if(generatedData['dataTag'] === this.getTag(soundMode)){
-            this.updateGeneratedPoints(generatedData.data, soundMode);
-            generatedData.params?.forEach((keyValue) => {
-                this.getGraphState().params.set(keyValue.name, keyValue.value)
-            })
-        }
+        this.pointFetcher.sendData({ points: userData, kernel:  this.getGraphState().kernel.name, params:  this.getGraphState().params, optimiseParams}, tag, soundMode);
     }
 
     generateDistributedDataFromPoints = (points: number[]) => {
@@ -269,8 +274,8 @@ class SoundGraph extends React.Component<Props, State> {
 
     render () {
             return (
-                <div className="graphContainer">
-                    <div style={{margin: "0 0 0 17.5vw"}}>
+                <div className="graphContainer"> 
+                    <div style={{margin: "auto"}}>
                         <ComposedChart width={this.width} height={this.height} onClick={this.handleGraphClick} >
                             <CartesianGrid strokeDasharray={"3 3"}/>
                             <Line yAxisId="sound" dataKey="y" dot={false}  data={this.state.soundGeneratedPoints} stroke={this.soundGraphColour()} />

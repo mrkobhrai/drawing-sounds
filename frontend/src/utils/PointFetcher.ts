@@ -1,5 +1,3 @@
-import SoundGraph from '../components/SoundGraph';
-import React from "react";
 import {FetchDataBody} from "../Interfaces";
 
 const BACKEND_WS_URL = 'ws://localhost:5000/gaussian'
@@ -12,19 +10,19 @@ const SOCKET_CONNECTION = {
 
 class PointFetcher {
     ws = new WebSocket(BACKEND_WS_URL)
-    graphRef: React.RefObject<SoundGraph>;
-    setSocketLoading: React.Dispatch<React.SetStateAction<string>>;
+    onData: ((data: any) => void)
+    setSocketLoading: (value: string) => void;
 
-    constructor(graphRef: React.RefObject<SoundGraph>, setSocketLoading: React.Dispatch<React.SetStateAction<string>>) {
+    constructor(onData: ((data: any) => void), setSocketLoading: (value: string) => void) {
         this.connectSocket();
-        this.graphRef = graphRef;
+        this.onData = onData;
         this.setSocketLoading = setSocketLoading;
     }
 
     connectSocket = () => { 
         this.ws.onopen = () => this.setSocketLoading(SOCKET_CONNECTION.CONNECTED);
         this.ws.onclose = () => this.setSocketLoading(SOCKET_CONNECTION.LOST_CONNECTION);
-        this.ws.onmessage = (evt) => this.graphRef.current?.onData(evt.data)
+        this.ws.onmessage = (evt) => this.onData(evt.data)
         this.ws.onerror = () => {
             this.setSocketLoading(SOCKET_CONNECTION.LOST_CONNECTION);
             console.log("Socket failed, reestablishing connection")
@@ -41,7 +39,7 @@ class PointFetcher {
             ...Object.fromEntries(body.params),
             optimiseParams: body.optimiseParams,
             dataTag,
-            batches: [4000, 8000],
+            batches: [700],
             soundMode,
         };
 

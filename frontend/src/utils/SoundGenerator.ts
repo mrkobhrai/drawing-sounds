@@ -31,7 +31,7 @@ class SoundGenerator {
         if(Math.min(soundPoints.length, amplitudePoints.length) === 0) {
             return;
         }
-        const sampleRate = soundPoints.length / duration;
+        const sampleRate = 42000;
         const audioContext = new AudioContext({sampleRate});
         const gainNode = audioContext.createGain();
         const maxSize: any = Math.max(soundPoints.length, amplitudePoints.length);
@@ -43,7 +43,7 @@ class SoundGenerator {
             for(let i = 0; i < maxSize; i++) {
                 const soundVal = soundPoints[Math.trunc(i / soundSampling)].y;
                 const amp = (amplitudePoints[Math.trunc(i / ampSampling / duration)].y);
-                gainNode.gain.linearRampToValueAtTime(amp, duration * i / amplitudePoints.length)
+                // gainNode.gain.linearRampToValueAtTime(amp, duration * i / amplitudePoints.length)
                 data.push(soundVal)
             }
         }
@@ -61,8 +61,8 @@ class SoundGenerator {
         source.buffer = this.audioBuffer;
         this.audioSource = source;
         this.audioContext = audioContext;
-        this.audioSource.start(0);
-        console.log(this.started);
+        console.log(audioContext.currentTime, 0, audioContext.currentTime + (duration  * sampleRate) / this.audioBuffer.duration);
+        this.audioSource.start(audioContext.currentTime, 0, audioContext.currentTime + (duration  * sampleRate) / this.audioBuffer.duration);
         if(this.started) {
             this.play();
         } else {
