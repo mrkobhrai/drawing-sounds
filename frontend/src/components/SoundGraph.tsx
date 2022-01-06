@@ -232,7 +232,7 @@ class SoundGraph extends React.Component<Props, State> {
             Kernels: Choose which kernel to use for generating the wave. You can tweak the parameters yourself, or optimise them automatically.`, // TODO: X-Axis range
             closeOnClickOutside: true,
             closeOnEsc: true,
-            dangerMode: true, // TODO HTML
+            dangerMode: true,
         });
 
     generateTable: () => JSX.Element = () => {
