@@ -221,60 +221,92 @@ class SoundGraph extends React.Component<Props, State> {
 
     generateTable: () => JSX.Element = () => {
         return  (
-        <table className="params">
-            <tbody>
+            <table className="optionTable">
                 <tr>
-                    <td className={"params"} >
-                        <Dropdown keyVals={new Map([['Sound Mode', 'sound'], ['Amplitude Mode', 'amplitude']])} selectedValue={this.isSoundMode() ? 'sound':'amplitude'} onChange={(e)=>this.setState({isSoundMode: e.target.value === 'sound'})}/>
+                    <td>
+                        <Collapsible trigger={"Graph Controls"}>
+                            <table className="params">
+                                <tbody>
+                                    <tr>
+                                        <td className="params" >
+                                            <Dropdown keyVals={new Map([['Sound Mode', 'sound'], ['Amplitude Mode', 'amplitude']])} selectedValue={this.isSoundMode() ? 'sound':'amplitude'} onChange={(e)=>this.setState({isSoundMode: e.target.value === 'sound'})}/>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td className="params">
+                                            <Button label="Resample Graph" onChange={() => this.onPlot(this.isSoundMode())}/>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td className="params">
+                                            <Button label="Reset Graph" onChange={this.resetPoints}/>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </Collapsible>
                     </td>
-                    <td className="params">
-                        <Button label="Resample Graph" onChange={() => this.onPlot(this.isSoundMode())}/>
+                    <td>
+                        <Collapsible trigger={"Sound Controls"}>
+                            <table className="params">
+                                <tbody>
+                                    <tr>
+                                        <td className="params">
+                                            <Button label="Play" onChange={this.soundGenerator().play}/>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td className="params">
+                                            <Button label="Pause" onChange={this.soundGenerator().pause}/>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td className={"params"}>
+                                            <Button label="Download" onChange={this.soundGenerator().downloadSound}/>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </Collapsible>
                     </td>
-                    <td className="params">
-                        <Button label="Reset Graph" onChange={this.resetPoints}/>
-                    </td>
-                    <td className="params">
-                        <Button label="Play" onChange={this.soundGenerator().play}/>
-                    </td>
-                    <td className="params">
-                        <Button label="Pause" onChange={this.soundGenerator().pause}/>
-                    </td>
-                    <td className={"params"}>
-                        <Button label="Download" onChange={this.soundGenerator().downloadSound}/>
+                    <td>
+                        <Collapsible trigger={"Advanced Controls"}>
+                            <table className="params">
+                                <tbody>
+                                    <tr>
+                                        <td className="params" colSpan={7}>
+                                            <Slider name={`X Axis Range`} min={1} max={20} step={1} value={this.state.maxX} onChange={(e) => this.handleXAxisSet(e)} onMouseUp={() => {}}/>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        {this.generateKernelDropdownAndParameters()}
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </Collapsible>
                     </td>
                 </tr>
-                <tr>
-                    <td className="params" colSpan={7}>
-                        <Slider name={`X Axis Range`} min={1} max={20} step={1} value={this.state.maxX} onChange={(e) => this.handleXAxisSet(e)} onMouseUp={() => {}}/>
-                    </td>
-                </tr>
-                <tr>
-                    {this.generateKernelDropdownAndParameters()}
-                </tr>
-            </tbody>
-        </table>
+            </table>
         )
     }
 
     render () {
             return (
                 <div className="graphContainer"> 
-                    <div style={{margin: "auto"}}>
+                    <div style={{margin: "auto", flexDirection: "row"}} >
                         <ComposedChart width={this.width} height={this.height} onClick={this.handleGraphClick} >
                             <CartesianGrid strokeDasharray={"3 3"}/>
                             <Line yAxisId="sound" dataKey="y" dot={false}  data={this.state.soundGeneratedPoints} stroke={this.soundGraphColour()} />
                             <Scatter yAxisId="sound" dataKey="y" fill={this.soundGraphColour()} data={this.state.soundUserPoints} />
                             <Line yAxisId="amp" dataKey="y" dot={false}  data={this.state.amplitudeGeneratedPoints} stroke={this.amplitudeGraphColour()} />
                             <Scatter yAxisId="amp" dataKey="y" fill={this.amplitudeGraphColour()} data={this.state.amplitudeUserPoints} />
-                            <XAxis tickLine={false} axisLine={true} type="number" dataKey="x" domain={[0, this.state.maxX]} interval={0} tickCount={this.state.maxX + 1} height={this.axisLength} allowDataOverflow={true} />
+                            <XAxis label={this.isSoundMode() ? "Ticks": "Time"} tickLine={false} axisLine={true} type="number" dataKey="x" domain={[0, this.state.maxX]} interval={0} tickCount={this.state.maxX + 1} height={this.axisLength} allowDataOverflow={true} />
                             <YAxis yAxisId="sound" orientation='left' tickLine={false} axisLine={this.isSoundMode()} type="number" domain={[this.state.sound.minY, this.state.sound.maxY]} interval={0} ticks={[this.state.sound.minY,0,this.state.sound.maxY]} width={this.axisLength}  allowDataOverflow={true} />
                             <YAxis yAxisId="amp" orientation='right' tickLine={false} axisLine={this.isAmplitudeMode()} type="number" domain={[this.state.amplitude.minY, this.state.amplitude.maxY]} interval={0} ticks={[this.state.amplitude.minY,0,this.state.amplitude.maxY]} width={this.axisLength}  allowDataOverflow={true} />
                             <Tooltip />
                         </ComposedChart>
                     </div>
-                    <Collapsible trigger="Options" >
-                        {this.generateTable()}
-                    </Collapsible>
+                    {this.generateTable()}
                 </div>
 
             )

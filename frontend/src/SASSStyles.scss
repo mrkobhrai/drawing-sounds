@@ -4,7 +4,7 @@ select, button {
   font-size: large;
   font-weight: bold;
   text-align: center;
-  width: 10vw;
+  width: 100%;
   background-color: black;
   color: white;
 }
@@ -44,21 +44,28 @@ div.graphContainer {
   width: 80vw;
   margin: 2vw 10vw 10vw 10vw;
 }
-
+table.optionTable {
+  padding: 2%;
+  text-align: center;
+  align-items: center;
+  justify-content: center;
+  margin: auto;
+  width: 100%;
+}
 table.params {
   padding: 2%;
   text-align: center;
   align-items: center;
   justify-content: center;
   margin: auto;
-  width: 50vw;
+  width: 100%;
 }
 
 td.params {
-  border: 2px solid black;
   padding: 20px;
   margin: 20px;
-  border-collapse: collapse;
+  align-items: center;
+  justify-content: center;
 }
 
 label.paramLabel {
@@ -122,6 +129,7 @@ div.socketStatus {
 // The main container element
 .Collapsible {
   background-color: white;
+  width: 100%;
 }
 
 
