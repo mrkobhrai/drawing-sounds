@@ -1,36 +1,15 @@
 class SoundGenerator {
     audioSource: AudioBufferSourceNode | undefined;
-    audioContext: AudioContext | undefined;
-    audioBuffer: AudioBuffer | undefined;
-    gainNode: GainNode | undefined;
-    started: boolean
+    audioBuffer: AudioBuffer | undefined; 
 
     // Declare the sample rate of the audio.
     SAMPLE_RATE = 42000
 
-    constructor () {
-        this.started = false;
-    }
-
-    play = () => {
-        if (typeof this.audioContext !== 'undefined') {
-            this.audioContext?.resume();
-            this.started = true;
-        }
-    }
-
-    pause = () => {
-        this.audioContext?.suspend();
-        this.started = false;
-    }
-
     resetSound = () => {
         this.audioSource?.disconnect();
-        this.audioContext?.close();
-        this.audioContext = undefined;
     }
 
-    generateSound = (soundPoints: {x: number, y: number}[], amplitudePoints: {x: number, y: number}[], duration=1) => {
+    play = (soundPoints: {x: number, y: number}[], amplitudePoints: {x: number, y: number}[], duration=1) => {
         // Reset the previous sound playing.
         this.resetSound();
         // Fetch sample rate (FIXED)
@@ -39,7 +18,6 @@ class SoundGenerator {
         const audioContext = new AudioContext({sampleRate});
         // Create a gain node to modulate amplitude
         const gainNode = audioContext.createGain();
-
         // Sound data array
         const data = soundPoints.map(point => point.y);
         
@@ -65,11 +43,7 @@ class SoundGenerator {
         source.buffer = this.audioBuffer;
         // Start the audio source now, make it end once finished
         source.start(audioContext.currentTime, 0, audioContext.currentTime + duration);
-        if(this.started) {
-            this.play();
-        } else {
-            this.pause();
-        }
+        this.audioSource = source;
     }
 
     sum(a: number[]){
