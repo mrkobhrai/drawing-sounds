@@ -3,7 +3,7 @@ import {FetchDataBody} from "../Interfaces";
 const BACKEND_WS_URL = 'ws://localhost:5000/gaussian'
 
 const SOCKET_CONNECTION = {
-    CONNECTING: 'Connecting',
+    CONNECTING: 'Connecting...',
     CONNECTED: 'Connected :)',
     LOST_CONNECTION: 'Lost connection, trying to reconnect...',
 }

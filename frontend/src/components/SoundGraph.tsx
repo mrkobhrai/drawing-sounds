@@ -285,10 +285,33 @@ class SoundGraph extends React.Component<Props, State> {
         )
     }
 
+    Overlay = () => {
+        if(this.state.socketLoading === SOCKET_CONNECTION.CONNECTED) {
+            return null;
+        }
+
+        const style = {
+            height:this.height,
+            width: this.width,
+            backgroundColor: 'rgba(255, 255, 255, 0.8)', 
+            zIndex: 1,
+            lineHeight: this.height + 'px',
+            fontSize: '300%',
+            fontWeight: 900,
+        };
+
+        return (
+            <div style={{...style, position: 'absolute'}}>
+                    {this.state.socketLoading}
+            </div>
+        );
+    }
+
     render () {
             return (
                 <div className="graphContainer"> 
                     <div style={{margin: "auto", flexDirection: "row"}} >
+                        <this.Overlay />
                         <ComposedChart width={this.width} height={this.height} onClick={this.handleGraphClick} >
                             <CartesianGrid strokeDasharray={"3 3"}/>
                             <Line yAxisId="sound" dataKey="y" dot={false}  data={this.state.soundGeneratedPoints} stroke={this.soundGraphColour()} />
