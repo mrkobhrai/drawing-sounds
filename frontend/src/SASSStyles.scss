@@ -9,6 +9,33 @@ select, button {
   color: white;
 }
 
+button.help {
+  background-color: black;
+  height: 75px;
+  width: 75px;
+  padding: 0;
+  margin: 9;
+  text-align: center;
+  justify-content: center;
+  align-items: center;
+  color: white;
+  border-style: solid;
+  border-color: white;
+  right: 0;
+  float: right;
+  border-radius: 50%;
+  user-select: none;
+  font-size: xx-large;
+  font-weight: bolder;
+}
+
+div.helpBox {
+  align-items:flex-end;
+  justify-content: right;
+  width: 100%;
+  align-content: flex-end;
+}
+
 div.graphContainer {
   display: table;
   text-align: center;
