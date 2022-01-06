@@ -5,6 +5,9 @@ class SoundGenerator {
     gainNode: GainNode | undefined;
     started: boolean
 
+    // Declare the sample rate of the audio.
+    SAMPLE_RATE = 42000
+
     constructor () {
         this.started = false;
     }
@@ -28,41 +31,40 @@ class SoundGenerator {
     }
 
     generateSound = (soundPoints: {x: number, y: number}[], amplitudePoints: {x: number, y: number}[], duration=1) => {
-        if(Math.min(soundPoints.length, amplitudePoints.length) === 0) {
-            return;
-        }
-        const sampleRate = 42000;
-        const audioContext = new AudioContext({sampleRate});
-        const gainNode = audioContext.createGain();
-        const maxSize: any = Math.max(soundPoints.length, amplitudePoints.length);
-
-        const soundSampling = maxSize / soundPoints.length
-        const ampSampling = maxSize / amplitudePoints.length;
-        const data = [];
-        for(let j = 0; j < duration; j++) {
-            for(let i = 0; i < maxSize; i++) {
-                const soundVal = soundPoints[Math.trunc(i / soundSampling)].y;
-                const amp = (amplitudePoints[Math.trunc(i / ampSampling / duration)].y);
-                // gainNode.gain.linearRampToValueAtTime(amp, duration * i / amplitudePoints.length)
-                data.push(soundVal)
-            }
-        }
-        console.log(maxSize, data.length)
-        const waveArray  = new Float32Array(data);
-        this.audioBuffer = audioContext.createBuffer(1, waveArray.length, sampleRate);
-        this.audioBuffer.copyToChannel(waveArray, 0);
+        // Reset the previous sound playing.
         this.resetSound();
+        // Fetch sample rate (FIXED)
+        const sampleRate = this.SAMPLE_RATE;
+        // Fetch the audio context
+        const audioContext = new AudioContext({sampleRate});
+        // Create a gain node to modulate amplitude
+        const gainNode = audioContext.createGain();
+
+        // Sound data array
+        const data = soundPoints.map(point => point.y);
+        
+        // Schedule a linear ramp for each time point.
+        amplitudePoints.forEach((point, i) => gainNode.gain.linearRampToValueAtTime(point.y,  duration * i / amplitudePoints.length))
+
+        // Create a float array for the sound data
+        const waveArray  = new Float32Array(data);
+
+        // Create an audio buffer from the array
+        this.audioBuffer = audioContext.createBuffer(1, waveArray.length, sampleRate);
+        // Copy the array data to the buffer
+        this.audioBuffer.copyToChannel(waveArray, 0);
+        // Add an input buffer source to the audio context
         const source = audioContext.createBufferSource();
+        // Ensure it loops
         source.loop = true;
-        source.loopStart = 0;
-        source.loopEnd = duration;
+        // Connect the audio data to the gain node
+        gainNode.connect(audioContext.destination);
+        // Connect the gain node to the audio output
         source.connect(gainNode);
-        gainNode.connect(audioContext.destination)
+        // Set the source buffer to the buffer data
         source.buffer = this.audioBuffer;
-        this.audioSource = source;
-        this.audioContext = audioContext;
-        console.log(audioContext.currentTime, 0, audioContext.currentTime + (duration  * sampleRate) / this.audioBuffer.duration);
-        this.audioSource.start(audioContext.currentTime, 0, audioContext.currentTime + (duration  * sampleRate) / this.audioBuffer.duration);
+        // Start the audio source now, make it end once finished
+        source.start(audioContext.currentTime, 0, audioContext.currentTime + duration);
         if(this.started) {
             this.play();
         } else {
