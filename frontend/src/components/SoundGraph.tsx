@@ -274,11 +274,6 @@ class SoundGraph extends React.Component<Props, State> {
                             <table className="params">
                                 <tbody>
                                     <tr>
-                                        <td className="params" colSpan={7}>
-                                            <Slider name={`X Axis Range`} min={1} max={20} step={1} value={this.state.maxX} onChange={(e) => this.handleXAxisSet(e)} onMouseUp={() => {}}/>
-                                        </td>
-                                    </tr>
-                                    <tr>
                                         {this.generateKernelDropdownAndParameters()}
                                     </tr>
                                 </tbody>
