@@ -1,11 +1,10 @@
-import React, {useState} from 'react';
+import React from 'react';
 import './App.css';
 import './SASSStyles.scss';
 import SoundGraph from './components/SoundGraph';
 import swal from "sweetalert";
 
 function App() {
-  const [inputGraph] = useState(<SoundGraph />)
 
   const showHelp = () => swal({
     title: 'Designing Sounds by Drawing Them',
@@ -39,7 +38,7 @@ function App() {
       <div className="helpBox">
         <button onClick={showHelp} className="help">?</button>
       </div>
-      {inputGraph}
+      <SoundGraph />
     </div>
   )
 }
