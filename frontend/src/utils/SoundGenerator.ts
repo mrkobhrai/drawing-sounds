@@ -60,12 +60,13 @@ class SoundGenerator {
         return resultArray;
     }
 
-    downloadSound = () => {
+    downloadSound = (duration: number) => {
         //TODO make this same length as sound
         if (this.audioBuffer) {
             // Replicate the stored buffer points into a Float array
             const list = []
-            for (var i = 0; i < 100; i++) {
+            const bufferdata = this.audioBuffer.getChannelData(0);
+            for (var i = 0; i < Math.round(duration * this.SAMPLE_RATE / bufferdata.length); i++) {
                 list.push(this.audioBuffer.getChannelData(0))
             }
             const arr = this.concatFloatArray(list)
@@ -74,7 +75,7 @@ class SoundGenerator {
             const buffer = new AudioBuffer({
                 numberOfChannels: this.audioBuffer.numberOfChannels,
                 length: arr.length,
-                sampleRate: this.audioBuffer.sampleRate,
+                sampleRate: this.SAMPLE_RATE,
             })
             buffer.copyToChannel(arr, 0)
 

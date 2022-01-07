@@ -257,7 +257,7 @@ class SoundGraph extends React.Component<Props, State> {
                                     </tr>
                                     <tr>
                                         <td className={"params"}>
-                                            <Button label="Download" onChange={this.soundGenerator().downloadSound}/>
+                                            <Button label="Download" onChange={()=>this.soundGenerator().downloadSound(this.state.amplitude.maxX)}/>
                                         </td>
                                     </tr>
                                     <tr>
