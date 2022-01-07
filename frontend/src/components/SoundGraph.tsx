@@ -41,8 +41,8 @@ interface State {
 }
 
 class SoundGraph extends React.Component<Props, State> {
-    width = this.props.width ?? 1500
-    height = this.props.height ?? 800
+    width = this.props.width ?? 1600
+    height = this.props.height ?? 600
     axisLength = 50
     soundDatatag = 0
     amplitudeDatatag = 0
@@ -315,7 +315,7 @@ class SoundGraph extends React.Component<Props, State> {
     render () {
             return (
                 <div className="graphContainer"> 
-                    <div style={{margin: "auto", flexDirection: "row"}} >
+                    <div style={{width: '80vw', margin: '0 10vw'}}>
                         <this.Overlay />
                         <ComposedChart width={this.width} height={this.height} onClick={this.handleGraphClick} >
                             <CartesianGrid strokeDasharray={"3 3"}/>
