@@ -51,11 +51,12 @@ class SoundGraph extends React.Component<Props, State> {
         let generatedData: FetchRequestBody = JSON.parse(data);
         const soundMode = generatedData['soundMode'];
         if(generatedData['dataTag'] === this.getTag(soundMode)){
-            //TODO Check why optimise isn't working
+            console.log(generatedData.params);
             this.updateGeneratedPoints(generatedData.data, soundMode);
             generatedData.params?.forEach((keyValue) => {
                 this.getGraphState().params.set(keyValue.name, keyValue.value)
             })
+            this.setState({});
         }
     }
 
@@ -63,10 +64,12 @@ class SoundGraph extends React.Component<Props, State> {
 
     pointFetcher = new PointFetcher(this.onData, this.setLoading);
 
+    INIT_SOUND_USER_POINTS = [{x:0, y:0}, {x:1, y:0}]
+    INIT_AMP_USER_POINTS = [{x:0, y:1}, {x:1, y:1}] 
     state: State = {
-        soundUserPoints: [{x:0, y:0}, {x:1, y:0}],
+        soundUserPoints: this.INIT_SOUND_USER_POINTS,
         soundGeneratedPoints: [],
-        amplitudeUserPoints: [{x:0, y:1}, {x:1, y:1}],
+        amplitudeUserPoints: this.INIT_AMP_USER_POINTS,
         amplitudeGeneratedPoints: [],
         isSoundMode: true, // true when in sound mode, false when in amp modulation mode
         sound: {
@@ -173,10 +176,10 @@ class SoundGraph extends React.Component<Props, State> {
 
     resetPoints = () => {
         if (this.isSoundMode()) {
-            this.state.soundUserPoints.splice(0, this.state.soundUserPoints.length)
+            this.state.soundUserPoints = this.INIT_SOUND_USER_POINTS
             this.state.soundGeneratedPoints.splice(0, this.state.soundGeneratedPoints.length)
         } else {
-            this.state.amplitudeUserPoints.splice(0, this.state.amplitudeUserPoints.length)
+            this.state.amplitudeUserPoints = this.INIT_AMP_USER_POINTS
             this.state.amplitudeGeneratedPoints.splice(0, this.state.amplitudeGeneratedPoints.length)
         }
         this.getGraphState().params.clear()
@@ -259,12 +262,12 @@ class SoundGraph extends React.Component<Props, State> {
                                     </tr>
                                     <tr>
                                         <td className={"params"}>
-                                            <label>Sound Duration</label>
-                                            <input type={"number"} value={this.state.amplitude.maxX} onChange={(e)=>{
+                                            <Slider name={"Sound length"} min={1} max={10} step={1} value={this.state.amplitude.maxX} 
+                                            onChange={(e)=>{
                                                 this.state.amplitude.maxX = parseInt(e.target.value);
                                                 this.onPlot(false);
-                                                }
-                                            }/>
+                                                }} 
+                                            onMouseUp={()=>{}}/> 
                                         </td>
                                     </tr>
                                 </tbody>

@@ -9,7 +9,7 @@ select, button {
   color: white;
 }
 
-input {
+input.numinput {
   display: block;
   font-size: large;
   font-weight: bold;
@@ -61,14 +61,12 @@ table.optionTable {
   text-align: center;
   align-items: center;
   justify-content: center;
+  vertical-align: top;
   margin: auto;
   width: 100%;
 }
 table.params {
   padding: 2%;
-  text-align: center;
-  align-items: center;
-  justify-content: center;
   margin: auto;
   width: 100%;
 }
@@ -76,8 +74,6 @@ table.params {
 td.params {
   padding: 20px;
   margin: 20px;
-  align-items: center;
-  justify-content: center;
 }
 
 label.paramLabel {
@@ -142,6 +138,8 @@ div.socketStatus {
 .Collapsible {
   background-color: white;
   width: 100%;
+  vertical-align: top;
+  height: 0px;
 }
 
 
