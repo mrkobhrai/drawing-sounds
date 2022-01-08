@@ -62,11 +62,12 @@ def socket_handler(ws):
 @app.route('/', methods=['POST'])
 def generate_handler():
     request_body = request.get_json()
-    data, updated_params = handleRequest(request_body)
+    print(request_body)
+    batches = request_body['batches']
+    data = handleRequest(request_body, batches[0])
     # Process input
     response = {}
     response["data"] = [data]
-    response["params"] = updated_params
 
     return response
 
