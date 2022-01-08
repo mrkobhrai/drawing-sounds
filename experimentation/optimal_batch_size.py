@@ -3,7 +3,6 @@ import requests
 KERNELS = [
     'exponentiated_quadratic_kernel',
     'rational_quadratic_kernel',
-    'periodic_kernel',
 ]
 
 PARAMS = {
@@ -52,6 +51,7 @@ def experiment(request_bodys):
 def test_batch_size_response(batches, repeats=5):
     data = dict()
     for i in range(repeats):
+        data[i] = dict()
         for kernel in KERNELS:
             request_bodys = []
             for batch in batches:
