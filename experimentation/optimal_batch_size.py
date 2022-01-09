@@ -1,4 +1,5 @@
 import requests
+import csv
 
 KERNELS = [
     'exponentiated_quadratic_kernel',
@@ -50,9 +51,9 @@ def experiment(request_bodys):
 
 def test_batch_size_response(batches, repeats=5):
     data = dict()
-    for i in range(repeats):
-        data[i] = dict()
-        for kernel in KERNELS:
+    for kernel in KERNELS:
+        data[kernel] = dict()
+        for i in range(repeats):
             request_bodys = []
             for batch in batches:
                 body = sample_request.copy()
@@ -61,12 +62,19 @@ def test_batch_size_response(batches, repeats=5):
                 body['key'] = batch
                 request_bodys.append(body)
             results = experiment(request_bodys)
-            data[i][kernel] = results
-    print(data)
+            data[kernel][i] = results
+    with open('test_batch_size_response.csv', 'w', newline='') as csvfile:
+        spamwriter = csv.writer(csvfile)
+        for kernel in data:
+            print([kernel]+batches)
+            spamwriter.writerow([kernel] + batches)
+            for repeat in data[kernel]:
+                print([repeat+1] + list(data[kernel][repeat].values()))
+                spamwriter.writerow([repeat+1] + list(data[kernel][repeat].values()))
 
 
 def test_batch_ranges():
-    BATCHES = [100, 200, 300, 400, 500, 600, 700, 800, 800, 1000, 2000, 3000, 4000, 5000, 10000, 20000, 30000, 50000]
+    BATCHES = [100, 200, 300, 400, 500, 600, 700, 800, 800, 1000, 2000, 3000, 4000, 5000, 10000, 20000, 30000, 50000, 100000]
     test_batch_size_response(BATCHES)
 
 
