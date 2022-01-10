@@ -7,7 +7,7 @@ from flask_sock import Sock
 
 from model import GPSoundGenerator
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
 app = Flask(__name__)
 sock = Sock(app)
