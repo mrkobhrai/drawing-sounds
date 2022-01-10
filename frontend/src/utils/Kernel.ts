@@ -30,4 +30,22 @@ export const periodicKernel: Kernel = {
     parameters: [lengthScaleParam, periodParam, amplitudeParam]
 }
 
-export const kernels = [exponentiatedQuadraticKernel, rationalQuadraticKernel, periodicKernel]
+export const matern12: Kernel = {
+    name: 'matern12',
+    label: 'Matern12',
+    parameters: [lengthScaleParam, amplitudeParam]
+}
+
+export const matern32: Kernel = {
+    name: 'matern32',
+    label: 'Matern32',
+    parameters: [lengthScaleParam, amplitudeParam]
+}
+
+export const matern52: Kernel = {
+    name: 'matern52',
+    label: 'Matern52',
+    parameters: [lengthScaleParam, amplitudeParam]
+}
+
+export const kernels = [exponentiatedQuadraticKernel, rationalQuadraticKernel, periodicKernel, matern12, matern32, matern52]
